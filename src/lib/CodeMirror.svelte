@@ -1,3 +1,13 @@
+<!--
+  <div class="row mb-1">
+    <div class="col bg-danger shadow">
+      <Graph/>
+    </div>
+     <div class="col bg-danger shadow">
+      <CodeMirror/>
+    </div>
+  </div>
+-->
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { createEventDispatcher } from 'svelte';

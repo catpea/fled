@@ -1,3 +1,13 @@
+<!--
+  <div class="row mb-1">
+    <div class="col bg-danger shadow">
+      <Graph/>
+    </div>
+     <div class="col bg-danger shadow">
+      <CodeMirror/>
+    </div>
+  </div>
+-->
 <script>
   import { onMount, onDestroy } from 'svelte';
   import { application } from './stores.js';
@@ -11,6 +21,27 @@
   export let cytoscape;
   export let selected;
 
+
+      let tree = {
+            nodes: [
+              { data: { id: 'j', name: 'Jerry' } },
+              { data: { id: 'e', name: 'Elaine' } },
+              { data: { id: 'k', name: 'Kramer' } },
+              { data: { id: 'g', name: 'George' } }
+            ],
+            edges: [
+              { data: { source: 'j', target: 'e' } },
+              { data: { source: 'j', target: 'k' } },
+              { data: { source: 'j', target: 'g' } },
+              { data: { source: 'e', target: 'j' } },
+              { data: { source: 'e', target: 'k' } },
+              { data: { source: 'k', target: 'j' } },
+              { data: { source: 'k', target: 'e' } },
+              { data: { source: 'k', target: 'g' } },
+              { data: { source: 'g', target: 'j' } }
+            ],
+    }
+    
   let container = null; //  The readonly this binding (bind:this={parent}) allows you to obtain a reference to rendered elements.
 
   const cleanup = [];

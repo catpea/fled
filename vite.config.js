@@ -4,6 +4,9 @@ import copy from 'rollup-plugin-copy'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    // hmr: false
+  },
   plugins: [
     svelte(),
     copy({ targets: [ { src: 'node_modules/bootstrap/dist/**/*', dest: 'public/vendor/bootstrap' }  ] }),

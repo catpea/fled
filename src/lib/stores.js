@@ -1,5 +1,5 @@
-import EventEmitter from 'events';
+// import EventEmitter from 'events';
 import { writable } from 'svelte/store';
 
-export const application = new EventEmitter();
-export const cytoscape = writable();
+// export const application = new EventEmitter();
+// export const cytoscape = writable();
