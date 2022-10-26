@@ -1,62 +1,43 @@
 <script>
-  import { onMount } from 'svelte';
+import { onMount } from 'svelte';
 
-  import vfs from './lib/vfs.js'
+import lo from 'lodash';
+import EventEmitter from 'events';
 
-  import Nav from './lib/Nav.svelte'
-  import List from './lib/List.svelte'
+import Menu from "./com/Menu.svelte";
+import Database from "./com/Database.svelte";
+import Generator from "./com/Generator.svelte";
+import Graph from "./com/Graph.svelte";
+import Properties from "./com/Properties.svelte";
 
+const application = new EventEmitter()
 
-const hdd = [
+application.on('message', function (text) {
+  console.log(text)
+})
 
-  'root/functions/shared/dirname',
-  'root/functions/shared/unfurl',
-  'root/functions/shared/ls',
-  'root/functions/shared/dir',
-
-  'root/lists/file-system/raw/remove-empty',
-  'root/lists/file-system/raw/schema',
-  'root/lists/file-system/cleaned/bork',
-  'root/lists/file-system/unfurled',
-  
-  'root/README.md',
-];
-let fs = vfs(hdd);
-
-onMount(() => {});
 </script>
 
- 
- 
- 
-<Nav/>
-<main class="container-fluid bg-text-dark">
- 
+<Menu {application}/>
 
-
-  <div class="row mb-1">
-    <div class="col p-3">
-      <List fs={fs} path="/root"/>
-    </div>
-     <div class="col p-3">
-      Properties
+<div class="container-fluid">
+  <div class="row">
+    <div class="col p-2">
+      <a class="btn btn-dark float-end ms-1" on:click={()=>application.emit('menu.toggle')}><i class="bi bi-three-dots-vertical text-warning"></i></a>
     </div>
   </div>
-
-  <div class="row mb-1">
-     <div class="col p-3">
-      Generated Code
-      <pre>{JSON.stringify(fs.tree, null, '  ')}</pre>
-      
+  <div class="row">
+    <div class="col">
+      <Graph {application}/>
+    </div>
+    <div class="col-4">
+      <Properties {application}/>
     </div>
   </div>
- 
-</main>
-
- 
-
- 
- 
-
-<style>
-</style>
+  <div class="row">
+    <div class="col">
+      <Database {application}/>
+      <Generator {application}/>
+    </div>
+  </div>
+</div>
