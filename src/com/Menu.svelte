@@ -1,13 +1,23 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+
+  export let application;
 
   let node;
-  export let control;
+  let control;
+
+  const events = {
+    'menu.toggle': ()=>control?control.toggle():Infinity,
+  }
+
+  application.subscribe(events);
 
   onMount(async () => {
-
     control = new bootstrap.Offcanvas(node);
-    // control.show();
+  });
+
+  onDestroy(async () => {
+    application.unsubscribe(events);
   });
 
 </script>

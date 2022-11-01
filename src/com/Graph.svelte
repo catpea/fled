@@ -1,27 +1,22 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
 
-import Uptime from './Uptime.svelte';
+  import Uptime from './Uptime.svelte';
   import { v4 as uuidv4 } from 'uuid';
   import Cytoscape from 'cytoscape';
   import dagre from 'cytoscape-dagre';
+  import autopanOnDrag from 'cytoscape-autopan-on-drag';
+  autopanOnDrag( Cytoscape )
+
 
   export let application;
-
-  export let debug = false;
-  export let data = {
-        nodes: [],
-        edges: [],
-  };
-
-  export let cytoscape;
-  export let selected;
-
   let container = null; //  The readonly this binding (bind:this={parent}) allows you to obtain a reference to rendered elements.
 
-  const cleanup = [];
+  let cytoscape;
+  let selected; // just ID
 
   const layoutOptions = {
+
     name: 'dagre',
     // dagre algo options, uses default value on undefined
     nodeSep: undefined, // the separation between adjacent nodes in the same rank
@@ -50,177 +45,151 @@ import Uptime from './Uptime.svelte';
     stop: function(){} // on layoutstop
   };
 
-  const load = (data) => {
-    if(!cytoscape) return
-
-    cytoscape.elements().remove();
-    cytoscape.add(data);
-
-    const layout = cytoscape.layout(layoutOptions);
-    layout.run();
-  }
+  const load = (incoming) => {
+    destroy();
 
 
+    const data = {
+      nodes:incoming.nodes.map(data=>({data})),
+      edges:incoming.edges.map(data=>({data})),
+    };
 
-
-  application.on('data', function(data){
-    console.log('got data', data);
-
-    load(data);
-  })
-
-  onMount(async () => {
-
-
+    const color = {
+      text: "#b7b7b7",
+      outline: "#191919",
+      default: "#191919",
+      active: "#0d9071",
+      selected: "#9d333d",
+    };
 
     cytoscape = Cytoscape({
       container,
       elements: data,
       style: [ // the stylesheet for the graph
-          {
-            selector: 'node',
-            style: {
-              'color': 'white',
-              'background-color': '#666',
-              'label': 'data(name)',
-
-
-            }
-          },
-
-          {
-            selector: 'node:selected',
-            style: {
-
-              'background-color': '#ff0000',
-
-            }
-          },
-
-
-
-
-
-
-          {
-            selector: 'edge',
-            style: {
-              'width': 3,
-              'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
-              'target-arrow-shape': 'triangle',
-              'curve-style': 'bezier'
-            }
-          },
-
-          {
-            selector: 'edge:selected',
-            style: {
-
-              'line-color': '#ff0000',
-
-            }
-          },
-
-        ],
-
-
-
-    // style: Cytoscape.stylesheet()
-    //       .selector('node')
-    //         .style({
-    //           'background-color': function( ele ){ return ele.selected() }
-    //
-    //           // which works the same as
-    //
-    //           // 'background-color': 'data(bg)'
-    //         })
-
-
-
-
+        { selector: 'node', style: { 'color': color.text, 'background-color': color.default, 'label': 'data(name)', 'text-outline-width': 3, 'text-outline-color': color.outline, } },
+        { selector: 'edge', style: { 'width': 3, 'line-color': color.default, 'target-arrow-color': color.default, 'target-arrow-shape': 'triangle', 'curve-style': 'bezier' } },
+        { selector: 'node[body]', style: { 'background-color': color.active, } },
+        { selector: 'edge[body]', style: { 'line-color': color.active, 'target-arrow-color': color.active,} },
+        { selector: 'node:selected', style: { 'background-color': color.selected, } },
+        { selector: 'edge:selected', style: { 'color': color.selected, 'line-color': color.selected, 'target-arrow-color': color.selected,} },
+      ],
     }); // cytoscape
 
 
+    cytoscape.on('click', function(evt){
+      let node = evt.target;
+      let isNode = !!node.id;
 
-    // cytoscape.style().fromJson([ // the stylesheet for the graph
-    //   {
-    //     selector: 'node',
-    //     style: {
-    //       'color': 'white',
-    //       'background-color': '#666',
-    //       'label': 'data(name)',
-    //
-    //       //'text-valign': 'center',
-    //     }
-    //   },
-    //   {
-    //     selector: 'edge',
-    //     style: {
-    //       'width': 3,
-    //       'line-color': '#ccc',
-    //       'target-arrow-color': '#ccc',
-    //       'target-arrow-shape': 'triangle',
-    //       'curve-style': 'bezier'
-    //     }
-    //   }
-    // ]);
-  Cytoscape.use( dagre );
+      if(isNode){
+        selected = node.id();
+        application.emit('graph.selected', selected);
+      }else{
+        selected = null;
+        application.emit('graph.unselected', {});
+      }
 
-  cytoscape.on('click', function(evt){
-    let node = evt.target;
-    let isNode = !!node.id;
-    if(isNode){
-      application.emit('graph.selected', node.id());
-    }else{
-      application.emit('graph.unselected', {});
-    }
-  });
+      console.log('selected', selected);
 
+    });
 
+    cytoscape.mount(container);
+    Cytoscape.use( dagre );
 
+    const autopanOnDragOptions = {
+    enabled: true, // Whether the extension is enabled on register
+    selector: 'node', // Which elements will be affected by this extension
+    speed: 0.1 // Speed of panning when elements exceed canvas bounds
+    };
+    const autopanOnDragInstance = cytoscape.autopanOnDrag( autopanOnDragOptions );
+    autopanOnDragInstance.enable();
 
+    cytoscape.elements().remove();
 
-    //application.on('load', load);
+    // console.log('formatted', formatted);
 
-
-
+    cytoscape.add(data);
 
     const layout = cytoscape.layout(layoutOptions);
-    layout.run();
-    cytoscape.mount(container);
+
+    try{
+      layout.run();
+    }catch(e){
+      console.log(e);
+    }
+
+  }
 
 
+  const events = {
+    'database.change': data => load(data.snapshot),
+  }
 
+  application.subscribe(events);
 
+  onMount(async () => {
 
-
-
-
-    cleanup.push(()=>cytoscape.destroy());
-
-    if(debug) cleanup.push(()=>console.log('[Cytoscape.svelte] just cleaned up after it self.'))
-    //application.emit('cytoscape', cytoscape);
-    // application.on('load', function(data){
-    //   console.log('LOAD EVENT!', data);
-    //
-    //
-    //
-    // });
-
-
+    application.emit('database.snapshot');
 
   }); // onMount
 
-  onDestroy(() => cleanup.map(o=>o()));
+  onDestroy(() => {
+    destroy();
+  });
+
+  function destroy(){
+    application.unsubscribe(events);
+    if(!cytoscape) return;
+    cytoscape.off('click');
+    cytoscape.removeAllListeners()
+    cytoscape.destroy();
+  }
+
+
+function addNode(){
+  if(!selected) return;
+  const targetId = 'node-' + uuidv4();
+  const edgeId = 'node-' + uuidv4();
+  application.emit('database.add', [
+    {"type":"edge","source":selected,"target":targetId,"_id":edgeId}, // edge
+    {"type":"node","name":"Untitled","_id":targetId},  // node
+  ]);
+  application.emit('database.snapshot');
+}
+function deleteNode(){
+  if(!selected) return;
+  application.emit('database.remove', selected);
+  application.emit('database.snapshot');
+}
+function generateCode(){
+
+
+}
+
+
+
 
 </script>
+
 <style>
   .cy {
-    height: 40vh;
+    background-color: #232323 ! important;
+    height: 50vh;
   }
 </style>
-<Uptime/>
-<div class="card text-bg-dark mb-3 h-100">
-  <div class="cy" bind:this={container}></div>
+
+<div class="mb-3 clearfix">
+  <button class="btn btn-sm btn-dark shadow-sm float-start me-2" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-file-earmark-plus"></i></button>
+
+  <button class="btn btn-sm btn-info shadow-sm float-start me-1" title="New Node" on:click={addNode}><i class="bi bi-node-plus"></i></button>
+  <button class="btn btn-sm btn-danger shadow-sm float-start me-2" title="New Node" on:click={deleteNode}><i class="bi bi-node-minus"></i></button>
+
+  <button class="btn btn-sm btn-dark shadow-sm float-start me-1" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-scissors"></i></button>
+  <button class="btn btn-sm btn-dark shadow-sm float-start me-1" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-stickies"></i></button>
+  <button class="btn btn-sm btn-dark shadow-sm float-start me-1" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-clipboard"></i></button>
+
+  <button class="btn btn-sm btn-danger shadow-sm float-end me-1" on:click={generateCode}><i class="bi bi-heart-fill"></i></button>
+  <button class="btn btn-sm btn-dark shadow-sm float-end me-1" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-arrow-clockwise"></i></button>
+  <button class="btn btn-sm btn-dark shadow-sm float-end me-1" on:click={()=>application.emit('properties.update', Object.assign({properties:{"url": { "type": "string" }} },doc))}><i class="bi bi-arrow-counterclockwise"></i></button>
 </div>
+
+<div class="cy rounded" bind:this={container}></div>
