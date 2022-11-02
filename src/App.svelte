@@ -6,13 +6,16 @@ import EventEmitter from 'events';
 
 import Menu from "./com/Menu.svelte";
 import Database from "./com/Database.svelte";
-import Generator from "./com/Generator.svelte";
-import Graph from "./com/Graph.svelte";
-import Properties from "./com/Properties.svelte";
-import Viewer from "./com/Viewer.svelte";
-import Projects from "./com/Projects.svelte";
-import Users from "./com/Users.svelte";
-import Document from "./com/Document.svelte";
+import DesignView from "./com/DesignView.svelte";
+import ProfileAdd from "./com/ProfileAdd.svelte";
+
+// import Generator from "./com/Generator.svelte";
+// import Graph from "./com/Graph.svelte";
+// import Properties from "./com/Properties.svelte";
+// import Viewer from "./com/Viewer.svelte";
+// import Projects from "./com/Projects.svelte";
+// import Users from "./com/Users.svelte";
+// import Document from "./com/Document.svelte";
 
 class Application extends EventEmitter {
   subscribe(events){
@@ -48,6 +51,24 @@ application.on('message', function (text) {
 
   <div class="row">
 
+    <div class="col-3">
+    <DesignView design="fled_fast" view="by_type" key="user" {application}/>
+    </div>
+    <div class="col-3">
+    <DesignView design="fled_fast" view="by_type" key="project" {application}/>
+    </div>
+    <div class="col-3">
+    <DesignView design="fled_fast" view="by_type" key="project" {application}/>
+    </div>
+    <div class="col-3">
+    <ProfileAdd {application}/>
+    </div>
+
+  </div>
+
+
+  <!-- <div class="row">
+
     <div class="col-2">
       <Users {application}/>
     </div>
@@ -58,9 +79,9 @@ application.on('message', function (text) {
       <Document {application}/>
     </div>
 
-  </div>
+  </div> -->
 
-  <div class="row text-bg-info">
+  <!-- <div class="row text-bg-info">
 
     <div class="col" style="min-height: 20rem;">
       program visualization here
@@ -69,7 +90,7 @@ application.on('message', function (text) {
     <div class="col-3 text-bg-success">
       properties here
     </div>
-  </div>
+  </div> -->
 
   <div class="row">
     <div class="col">

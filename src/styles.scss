@@ -1,0 +1,13 @@
+// Toggle global options
+$enable-gradients: true;
+$enable-shadows: true;
+
+$offcanvas-box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175);
+
+// Customize some defaults
+$body-color: red;
+$body-bg: #08313a;
+$border-radius: .4rem;
+$success: #7952b3;
+
+@import "~bootstrap/scss/bootstrap";

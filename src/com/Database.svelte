@@ -1,34 +1,28 @@
 <script>
 
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-
-  import pretty from 'pretty';
-  import hljs from 'highlight.js/lib/core';
-  import json from 'highlight.js/lib/languages/json';
-  import javascript from 'highlight.js/lib/languages/javascript';
-  import 'highlight.js/styles/base16/tomorrow-night.css';
-  hljs.registerLanguage('javascript', javascript);
-  hljs.registerLanguage('json', json);
-  function highlight(code, language='javascript', ocd=true){
-    // return hljs.highlight(pretty(code, {ocd}), {language}).value;
-    return hljs.highlight(code, {language}).value;
-  }
+  import Source from './Source.svelte';
 
   import { v4 as uuidv4 } from 'uuid';
+  import lo from 'lodash';
+
+
   import PouchDB from 'pouchdb-browser';
   import pouchdbFind from 'pouchdb-find';
-
-  import lo from 'lodash';
 
   export let application;
 
   let node;
 
   let changeMonitor = null;
+
   const connections = {};
   const cleanup = [];
 
-  let allDocs = [];
+  let viewCode = 'info';
+  let allDocs = {};
+  let indexes = {};
+  let info = {};
 
   PouchDB
     .plugin(pouchdbFind)
@@ -38,6 +32,8 @@
 
   // Create, Read, Update, Delete
   const events = {
+    'database': fn => fn(db),
+
     'graph.selected': async id => application.emit('database.selected', await db.get(id)),
     'database.snapshot': async ()=> application.emit('database.change', {snapshot: await snapshot()}),
     'properties.update': async (doc)=>{
@@ -102,6 +98,11 @@
   })
 
   onMount(async () => {
+
+    allDocs = await db.allDocs({include_docs:true});
+    indexes = await db.getIndexes();
+    info = await db.info();
+
 
       // await db.destroy();
     //  await db.put({_id:'node-afcca590-12ca-4679-a57c-648d5695705e', name:'Bork!'});
@@ -183,7 +184,8 @@
       include_docs:true
     });
 
-    allDocs = await db.allDocs({include_docs:true});
+
+
     changeMonitor.on('change', async function(change) {
       application.emit('database.change', {change, snapshot: await snapshot()} );
       allDocs = await db.allDocs({include_docs:true});
@@ -200,7 +202,6 @@
       //   }
       // });
 
-      // const indexes = await db.getIndexes();
       // console.log(indexes);
 
 
@@ -219,12 +220,65 @@
 
   });
 
+  async function designViewQuery(){
+    await db.query('fled_fast/by_type')
+  }
+
+  async function designViewUpdate(){
+
+    const ddoc = {
+      _id: '_design/fled_fast',
+      views: {
+        by_name: { ///////////////////////////////////////////////////////////// db.changes({ filter: '_view', view: 'fled_fast/by_name' });
+          map: (({name}) => { emit(name); }).toString()
+        },
+        by_type: {
+          map: (({type}) => { emit(type); }).toString()
+        },
+      },
+      filters: {
+        by_type: function (doc, req) { ///////////////////////////////////////// db.changes({ filter: 'fled_fast/by_type', query_params: {type: 'user'} });
+          return doc.type === req.query.type;
+        }.toString()
+      }
+    };
+
+    await db.put( Object.assign( await db.get(ddoc._id), ddoc, {_rev: (await db.get(ddoc._id))._rev} ) )
+
+  }
+
 </script>
 
-<div bind:this={node}>
-    <pre>
-    <code>
-    {@html highlight(JSON.stringify(allDocs, null, '  '), 'json')}
-    </code>
-    </pre>
+<div bind:this={node} class="container-fluid text-bg-dark rounded shadow pe-0" style="min-height: 45rem;">
+  <div class="row">
+
+  <div class="col-8">
+
+    <button class="btn btn-sm btn-primary" on:click={designViewUpdate}>Inject Design View</button>
+    <button class="btn btn-sm btn-primary" on:click={designViewUpdate}>Query Type View</button>
+
+  </div>
+
+  <div class="col-4">
+
+  <ul class="nav nav-tabs border-info">
+    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'info'} aria-current="page" on:click={()=>viewCode='info'}>info</a></li>
+    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'allDocs'} aria-current="page" on:click={()=>viewCode='allDocs'}>allDocs</a></li>
+    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'indexes'} aria-current="page" on:click={()=>viewCode='indexes'}>indexes</a></li>
+  </ul>
+
+
+    <div class="mb-0 border-start border-info" style="overflow-x: hidden; overflow-y: scroll; height: 45rem;">
+    {#if viewCode == 'allDocs'}
+      <Source format="json" data={allDocs}/>
+    {:else if viewCode == 'indexes'}
+      <Source format="json" data={indexes}/>
+    {:else if viewCode == 'info'}
+      <Source format="json" data={info}/>
+    {/if}
+    </div>
+
+  </div>
+
+  </div>
 </div>
