@@ -1,13 +1,16 @@
 <script>
 import { onMount } from 'svelte';
+import {application} from './lib/application.js';
 
 import lo from 'lodash';
-import EventEmitter from 'events';
 
 import Menu from "./com/Menu.svelte";
 import Database from "./com/Database.svelte";
 import DesignView from "./com/DesignView.svelte";
 import ProfileAdd from "./com/ProfileAdd.svelte";
+import NewView from "./com/NewView.svelte";
+import EditView from "./com/EditView.svelte";
+import EditViewx from "./com/EditViewx.svelte";
 
 // import Generator from "./com/Generator.svelte";
 // import Graph from "./com/Graph.svelte";
@@ -17,29 +20,11 @@ import ProfileAdd from "./com/ProfileAdd.svelte";
 // import Users from "./com/Users.svelte";
 // import Document from "./com/Document.svelte";
 
-class Application extends EventEmitter {
-  subscribe(events){
-    Object.entries(events)
-    .map(([key,val])=>key.split(' ').map(key=>[key,val])).flat(1)
-    // .map(([key,val])=>console.log(key,val))
-    .map(([key,val])=>this.on(key, val))
-  }
-  unsubscribe(events){
-    Object.entries(events)
-    .map(([key,val])=>key.split(' ').map(key=>[key,val])).flat(1)
-    .map(([key,val])=>this.off(key, val))
-  }
-}
 
-const application = new Application()
-
-application.on('message', function (text) {
-  console.log(text)
-})
 
 </script>
 
-<Menu {application}/>
+<Menu/>
 
 <div class="container-fluid">
 
@@ -49,34 +34,46 @@ application.on('message', function (text) {
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mb-5">
 
     <div class="col-3">
-    <DesignView design="fled_fast" view="by_type" key="user" {application}/>
+    <DesignView design="fled_fast" view="by_type" key="user"/>
     </div>
     <div class="col-3">
-    <DesignView design="fled_fast" view="by_type" key="project" {application}/>
+    <DesignView design="fled_fast" view="by_type" key="project"/>
     </div>
     <div class="col-3">
-    <DesignView design="fled_fast" view="by_type" key="project" {application}/>
+    <DesignView design="fled_fast" view="by_type" key="project"/>
     </div>
     <div class="col-3">
-    <ProfileAdd {application}/>
+    <ProfileAdd/>
     </div>
+
 
   </div>
 
+  <div class="row mb-5">
+      <div class="col-3">
+        <NewView/>
+      </div>
+      <div class="col-3">
+        <EditView/>
+      </div>
+      <div class="col-3">
+        <EditViewx/>
+      </div>
+  </div>
 
   <!-- <div class="row">
 
     <div class="col-2">
-      <Users {application}/>
+      <Users/>
     </div>
     <div class="col-6">
-      <Projects {application}/>
+      <Projects/>
     </div>
     <div class="col-4">
-      <Document {application}/>
+      <Document/>
     </div>
 
   </div> -->
@@ -92,25 +89,25 @@ application.on('message', function (text) {
     </div>
   </div> -->
 
-  <div class="row">
+  <div class="row mb-5">
     <div class="col">
-      <Database {application}/>
+      <Database/>
     </div>
   </div>
 
   <!-- <div class="row">
     <div class="col-8">
-      <Viewer {application}/>
-      <Graph {application}/>
+      <Viewer/>
+      <Graph/>
     </div>
     <div class="col-4">
-      <Properties {application}/>
+      <Properties/>
     </div>
   </div>
 
   <div class="row">
     <div class="col">
-       <Generator {application}/>
+       <Generator/>
     </div>
   </div> -->
 

@@ -1,3 +1,51 @@
+$blue:    #0d6efd;
+$indigo:  #6610f2;
+$purple:  #6f42c1;
+$pink:    #d63384;
+$red:     #df727c;
+$orange:  #fd7e14;
+$yellow:  #ffc107;
+$green:   #198754;
+$teal:    #20c997;
+$cyan:    #0dcaf0;
+
+$white:    #fff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black:    #000;
+
+
+$primary:       $blue;
+$secondary:     $gray-600;
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-100;
+$dark:          $gray-800;
+$darker:        $gray-900;
+
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark,
+  "darker":     $darker
+);
+
+
+
 // Toggle global options
 $enable-gradients: true;
 $enable-shadows: true;
@@ -5,9 +53,45 @@ $enable-shadows: true;
 $offcanvas-box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175);
 
 // Customize some defaults
-$body-color: red;
-$body-bg: #08313a;
+$body-color: rgb(157, 185, 137);
+$body-bg: #15181b;
 $border-radius: .4rem;
 $success: #7952b3;
+
+// scss-docs-start box-shadow-variables
+$inset-shadow:                  inset 0 .5rem 1rem rgba($black, .15) !default;
+$inset-shadow-sm:               inset 0 .125rem .25rem rgba($black, .075) !default;
+$inset-shadow-lg:               inset 0 1rem 3rem rgba($black, .175) !default;
+$inset-shadow-inset:            inset 0 1px 2px rgba($black, .075) !default;
+
+$utilities: (
+  "opacity": (
+    property: opacity,
+    class: opacity,
+    state: hover,
+    values: (
+      0: 0,
+      25: .25,
+      50: .5,
+      75: .75,
+      100: 1,
+    )
+  ),
+
+  "inset": (
+    property: box-shadow,
+    class: inset,
+    values: (
+      null: $inset-shadow,
+      sm: $inset-shadow-sm,
+      lg: $inset-shadow-lg,
+      none: none,
+    )
+  ),
+
+);
+
+
+
 
 @import "~bootstrap/scss/bootstrap";

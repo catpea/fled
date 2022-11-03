@@ -1,16 +1,15 @@
 <script>
 
+  import {application} from '../lib/application.js';
+  
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import Source from './Source.svelte';
 
   import { v4 as uuidv4 } from 'uuid';
   import lo from 'lodash';
 
+  import {db} from '../lib/database.js';
 
-  import PouchDB from 'pouchdb-browser';
-  import pouchdbFind from 'pouchdb-find';
-
-  export let application;
 
   let node;
 
@@ -24,11 +23,8 @@
   let indexes = {};
   let info = {};
 
-  PouchDB
-    .plugin(pouchdbFind)
-    .plugin({allIndexedDbs: async function () { return Promise.all( (await indexedDB.databases()) .filter(o=>o.name.startsWith('_pouch_')) .map(o=>o.name.substr('_pouch_'.length)) .map(name=>(connections[name])?connections[name]:connections[name] = new PouchDB(name)) .map(async db => await db.info()))}})
 
-  const db = new PouchDB('fled-v1');
+  // const db = new PouchDB('fled-v1');
 
   // Create, Read, Update, Delete
   const events = {
@@ -249,7 +245,7 @@
 
 </script>
 
-<div bind:this={node} class="container-fluid text-bg-dark rounded shadow pe-0" style="min-height: 45rem;">
+<!-- <div bind:this={node} class="container-fluid text-bg-dark rounded shadow pe-0" style="min-height: 45rem;">
   <div class="row">
 
   <div class="col-8">
@@ -281,4 +277,4 @@
   </div>
 
   </div>
-</div>
+</div> -->

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/parser": "^7.20.1",
     "@codemirror/commands": "^6.1.1",
     "@codemirror/lang-javascript": "^6.1.0",
     "@codemirror/state": "^6.1.2",
@@ -28,7 +29,8 @@
     "lodash": "^4.17.21",
     "pouchdb-browser": "^7.3.0",
     "pouchdb-find": "^7.3.0",
-    "pretty": "^2.0.0",
+    "prettier": "^2.7.1",
+    "svelte-fsm": "^1.2.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

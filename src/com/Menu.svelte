@@ -1,7 +1,9 @@
 <script>
-  import { onMount, onDestroy } from 'svelte';
 
-  export let application;
+  import {application} from '../lib/application.js';
+  import {db} from '../lib/database.js';
+
+  import { onMount, onDestroy } from 'svelte';
 
   let node;
   let control;
