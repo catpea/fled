@@ -29,7 +29,7 @@
 <label class="form-label" for="selectDesignDocument">New Design Document</label>
 <div class="input-group mb-4">
   <span class="input-group-text text-bg-dark" id="newView">_design/</span>
-  <input type="text" class="form-control" placeholder="New Design Document" aria-label="Username" aria-describedby="newView">
+  <input type="text" class="form-control" placeholder="new design document id" aria-label="Username" aria-describedby="newView">
 </div>
 
 <label class="form-label" for="newView">View/Index Name</label>

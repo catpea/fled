@@ -10,7 +10,9 @@ import DesignView from "./com/DesignView.svelte";
 import ProfileAdd from "./com/ProfileAdd.svelte";
 import NewView from "./com/NewView.svelte";
 import EditView from "./com/EditView.svelte";
-import EditViewx from "./com/EditViewx.svelte";
+import DesignNavigator from "./com/DesignNavigator.svelte";
+
+import ColorTheme from "./app/ColorTheme.svelte";
 
 // import Generator from "./com/Generator.svelte";
 // import Graph from "./com/Graph.svelte";
@@ -25,6 +27,84 @@ import EditViewx from "./com/EditViewx.svelte";
 </script>
 
 <Menu/>
+
+
+
+
+
+
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col p-2">
+    <h3>
+      End User Application Level
+      <small class="text-muted">Useful Programs With Storage and Authentication</small>
+    </h3>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container-fluid">
+  <div class="row">
+
+    <div class="col p-2">
+      <ColorTheme/>
+    </div>
+
+
+    <div class="col p-2">
+    JavaScript Editor
+    </div>
+
+
+    <div class="col p-2">
+    Song Beat Coutiner
+    </div>
+
+    <div class="col p-2">
+    Alone Song Generator
+    </div>
+
+
+    <div class="col p-2">
+    Noise Machine
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col p-2">
+    <h3>
+      Database Utilities Level
+      <small class="text-muted">Database User Interface Panes</small>
+    </h3>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 
 <div class="container-fluid">
 
@@ -57,10 +137,13 @@ import EditViewx from "./com/EditViewx.svelte";
         <NewView/>
       </div>
       <div class="col-3">
+        <DesignNavigator/>
+      </div>
+      <div class="col-3">
         <EditView/>
       </div>
       <div class="col-3">
-        <EditViewx/>
+      ...
       </div>
   </div>
 
@@ -89,11 +172,6 @@ import EditViewx from "./com/EditViewx.svelte";
     </div>
   </div> -->
 
-  <div class="row mb-5">
-    <div class="col">
-      <Database/>
-    </div>
-  </div>
 
   <!-- <div class="row">
     <div class="col-8">
@@ -111,4 +189,28 @@ import EditViewx from "./com/EditViewx.svelte";
     </div>
   </div> -->
 
+</div>
+
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col p-2">
+    <h3>
+      Database Data Level
+      <small class="text-muted">Raw Data and Commands</small>
+    </h3>
+    </div>
+  </div>
+</div>
+
+
+<div class="container-fluid">
+  <div class="row">
+  <div class="row mb-5">
+    <div class="col">
+      <Database/>
+    </div>
+  </div>
+  </div>
 </div>

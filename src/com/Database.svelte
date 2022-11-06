@@ -1,9 +1,10 @@
 <script>
 
   import {application} from '../lib/application.js';
-  
+
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import Source from './Source.svelte';
+  import ObjectCard from './ObjectCard.svelte';
 
   import { v4 as uuidv4 } from 'uuid';
   import lo from 'lodash';
@@ -19,9 +20,11 @@
   const cleanup = [];
 
   let viewCode = 'info';
+  let databases = {};
   let allDocs = {};
   let indexes = {};
   let info = {};
+  let ddocs = [];
 
 
   // const db = new PouchDB('fled-v1');
@@ -95,9 +98,11 @@
 
   onMount(async () => {
 
+    databases = await db.indexedDatabases();
     allDocs = await db.allDocs({include_docs:true});
     indexes = await db.getIndexes();
     info = await db.info();
+    ddocs = await db.designDocuments();
 
 
       // await db.destroy();
@@ -105,8 +110,8 @@
 
      // const res = await db.put(Object.assign( await db.get('2c0be0e9-62aa-47ee-a5fe-bf4af0557cc5'), { source: 'a' } ));
 
-
-     // await db.remove(await db.get('224b7566-99d4-4cb0-8af7-c2d27547e5d8'))
+    const sacrafice = '_design/idx-9f3e9023f8bdf7ab37391cdb25252e4d';
+    //await db.remove(await db.get(sacrafice))
 
 
 
@@ -189,21 +194,8 @@
 
 
 
-      // await db.viewCleanup()
-
-
-      //  var result = await db.createIndex({
-      //   index: {
-      //     fields: ['type']
-      //   }
-      // });
-
-      // console.log(indexes);
-
-
-
-
-
+      await db.viewCleanup()
+      await db.createIndex({ index: { fields: ['type','user'] } });
 
       //
       //
@@ -245,36 +237,52 @@
 
 </script>
 
-<!-- <div bind:this={node} class="container-fluid text-bg-dark rounded shadow pe-0" style="min-height: 45rem;">
+<ul class="nav nav-tabs border-dark">
+  <li class="nav-item"><a class="nav-link border-dark" class:text-bg-dark={viewCode == 'info'} class:text-bg-darker={viewCode !== 'info'} aria-current="page" on:click={()=>viewCode='info'}>Info</a></li>
+  <li class="nav-item"><a class="nav-link border-dark" class:text-bg-dark={viewCode == 'databases'} class:text-bg-darker={viewCode !== 'databases'} aria-current="page" on:click={()=>viewCode='databases'}>Databases({databases?.length})</a></li>
+  <li class="nav-item"><a class="nav-link border-dark" class:text-bg-dark={viewCode == 'allDocs'} class:text-bg-darker={viewCode !== 'allDocs'} aria-current="page" on:click={()=>viewCode='allDocs'}>All Documents</a></li>
+  <li class="nav-item"><a class="nav-link border-dark" class:text-bg-dark={viewCode == 'dDocs'} class:text-bg-darker={viewCode !== 'dDocs'} aria-current="page" on:click={()=>viewCode='dDocs'}>Design Documents({ddocs?.rows?.length})</a></li>
+  <li class="nav-item"><a class="nav-link border-dark" class:text-bg-dark={viewCode == 'indexes'} class:text-bg-darker={viewCode !== 'indexes'} aria-current="page" on:click={()=>viewCode='indexes'}>Indexes</a></li>
+</ul>
+<div bind:this={node} class="container-fluid text-bg-darker rounded shadow pe-0" style="min-height: 45rem; border-top-left-radius: 0px !important; border-top-right-radius: 0px !important;">
   <div class="row">
 
-  <div class="col-8">
+  <!-- <div class="col-7">
 
     <button class="btn btn-sm btn-primary" on:click={designViewUpdate}>Inject Design View</button>
     <button class="btn btn-sm btn-primary" on:click={designViewUpdate}>Query Type View</button>
 
-  </div>
+  </div> -->
 
-  <div class="col-4">
-
-  <ul class="nav nav-tabs border-info">
-    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'info'} aria-current="page" on:click={()=>viewCode='info'}>info</a></li>
-    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'allDocs'} aria-current="page" on:click={()=>viewCode='allDocs'}>allDocs</a></li>
-    <li class="nav-item"><a class="nav-link border-info" class:text-bg-dark={viewCode == 'indexes'} aria-current="page" on:click={()=>viewCode='indexes'}>indexes</a></li>
-  </ul>
+  <div class="col">
 
 
-    <div class="mb-0 border-start border-info" style="overflow-x: hidden; overflow-y: scroll; height: 45rem;">
+
+  <div class="card-group">
+    <!-- debug ex: <Source data={databases}/> -->
+
     {#if viewCode == 'allDocs'}
-      <Source format="json" data={allDocs}/>
+      {#each allDocs.rows as data}
+        <div class="col"><ObjectCard title={data.id} data={data.doc}/></div>
+      {/each}
+    {:else if viewCode == 'dDocs'}
+      {#each ddocs.rows as data}
+        <div class="col"><ObjectCard title={data.id} data={data.doc}/></div>
+      {/each}
+    {:else if viewCode == 'databases'}
+      {#each databases as data}
+        <div class="col"><ObjectCard title={data.db_name} {data}/></div>
+      {/each}
     {:else if viewCode == 'indexes'}
-      <Source format="json" data={indexes}/>
+    {#each indexes.indexes as data}
+      <div class="col"><ObjectCard title={data.name} {data}/></div>
+    {/each}
     {:else if viewCode == 'info'}
-      <Source format="json" data={info}/>
+      <div class="col"><ObjectCard title="Database Information" data={info}/></div>
     {/if}
-    </div>
+</div>
 
   </div>
 
   </div>
-</div> -->
+</div>

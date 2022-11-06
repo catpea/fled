@@ -14,7 +14,11 @@ function pretty(code, options){
 
   let response = '';
 
+  try{
   response = prettier.format(code, { semi: true, parser: "babel", plugins:[parserBabel] });
+  }catch(e){
+    response = code;
+  }
 
   if(options.highlight){
     response = hljs.highlight(response, {language}).value;
