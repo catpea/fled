@@ -1,0 +1,164 @@
+$orange:  hsl( 19, 64%, 70%);
+$brown:   hsl( 11, 20%, 60%);
+$yellow:  hsl( 41, 47%, 65%);
+$green:   hsl(151, 39%, 48%);
+$teal:    hsl(162, 72%, 45%);
+$cyan:    hsl(180, 54%, 43%);
+$blue:    hsl(213, 61%, 67%);
+$purple:  hsl(260, 42%, 69%);
+$indigo:  hsl(262, 79%, 67%);
+$pink:    hsl(330, 52%, 64%);
+$red:     hsl(354, 46%, 69%);
+
+
+
+$white:    hsl(187, 10%, 88%);
+$gray-100: hsl(187, 10%, 80%);
+$gray-200: hsl(187, 10%, 72%);
+$gray-300: hsl(187, 10%, 64%);
+$gray-400: hsl(187, 10%, 56%);
+$gray-500: hsl(187, 10%, 48%);
+$gray-600: hsl(187, 20%, 36%);
+$gray-700: hsl(187, 30%, 32%);
+$gray-800: hsl(187, 40%, 16%);
+$gray-900: hsl(187, 50%, 12%);
+$black:    hsl(187, 60%, 08%);
+
+$primary:       $green;
+$secondary:     $gray-600;
+
+$success:       $green;
+$info:          $cyan;
+$warning:       $yellow;
+$danger:        $red;
+$light:         $gray-100;
+$dark:          $gray-800;
+$darker:        $gray-900;
+
+$theme-colors: (
+
+  "primary":    $primary,
+  "secondary":  $secondary,
+
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+
+  "action":     $warning,
+  "selected":   $gray-900,
+  "directory":  $purple,
+  "design":     $indigo,
+  "file":       $teal,
+
+
+  "light":      $light,
+  "dark":       $dark,
+  "darker":     $darker
+);
+
+$font-size-root:              null;
+$font-size-base:              .9rem; // Assumes the browser default, typically `16px`
+$font-size-sm:                $font-size-base * .75;
+$font-size-lg:                $font-size-base * 1.15;
+
+// Toggle global options
+$enable-caret:                true;
+$enable-rounded:              true;
+$enable-shadows:              true;
+$enable-gradients:            true;
+$enable-transitions:          true;
+$enable-reduced-motion:       true;
+$enable-smooth-scroll:        true;
+$enable-grid-classes:         true;
+$enable-container-classes:    true;
+$enable-cssgrid:              false;
+$enable-button-pointers:      true;
+$enable-rfs:                  true;
+$enable-validation-icons:     true;
+$enable-negative-margins:     false;
+$enable-deprecation-messages: true;
+$enable-important-utilities:  true;
+
+$offcanvas-box-shadow: 0 1rem 3rem rgba(0, 0, 0, .175);
+
+// Customize some defaults
+$body-color: hsl(94, 25%, 63%);
+$body-bg: hsl(193, 16%, 10%);
+$border-radius: .4rem;
+// $success: #7952b3;
+
+// scss-docs-start box-shadow-variables
+$inset:                  inset 0 .5rem 1rem rgba(#000000, .4);
+$inset-sm:               inset 0 .125rem .25rem rgba(#000000, .4);
+$inset-lg:               inset 0 1rem 3rem rgba(#000000, .4);
+
+$box-shadow:                  0 .5rem 1rem rgba(#000000, .5);
+$box-shadow-sm:               0 .125rem .25rem rgba(#000000, .5);
+$box-shadow-lg:               0 1rem 3rem rgba(#000000, .5);
+$box-shadow-inset:            inset 0 1px 2px rgba(#000000, .2);
+
+$utilities: (
+  "opacity": (
+    property: opacity,
+    class: opacity,
+    state: hover,
+    values: (
+      0: 0,
+      25: .25,
+      50: .5,
+      75: .75,
+      100: 1,
+    )
+  ),
+
+  "inset": (
+    property: box-shadow,
+    class: inset,
+    values: (
+      null: $inset,
+      sm: $inset-sm,
+      lg: $inset-lg,
+      none: none,
+    )
+  ),
+
+  "flush": (
+    property: margin padding,
+    class: flush,
+    values: (null: 0)
+  ),
+
+  "flush-x": (
+    property: padding-right padding-left margin-right margin-left,
+    class: flush-x,
+    values: (null: 0)
+  ),
+
+);
+
+// "padding-x": (
+//   responsive: true,
+//   property: padding-right padding-left,
+//   class: px,
+//   values: $spacers
+// ),
+
+
+// Do not decorate links with an underline by default.
+$link-decoration: none;
+// Give buttons underline on hover.
+$link-hover-decoration: underline;
+
+@import "~bootstrap/scss/bootstrap";
+
+body {
+  /* background: rgb(0, 16, 20); */
+  /* color: silver; */
+  /* font-size: .82rem; */
+  min-height: 100vh;
+  /* background-image: url('bg.jpg'); */
+  /* background-size: cover; */
+  /* filter: blur(8px); */
+  background: repeating-linear-gradient(45deg, darken($cyan,38), darken($cyan,38) 16px, darken($cyan,38.2) 16px, darken($cyan,38.2) 32px);
+}

@@ -7,6 +7,8 @@ import copy from 'rollup-plugin-copy'
 export default defineConfig({
   resolve: {
     alias: {
+      '~com': path.resolve('src/com'),
+      '~@fontsource': path.resolve('node_modules/@fontsource'),
       '~bootstrap': path.resolve('node_modules/bootstrap'),
     }
   },
