@@ -6,8 +6,11 @@
 
   // import {db} from '../../lib/database.js';
 
-  import { documentId } from './store.js';
-  import { fragments } from './store.js';
+  // import { document } from './store.js';
+  // import { fragments } from './store.js';
+
+  import { db, document, location, selection } from './store.js';
+
 
   let active = false;
   let error = '';
@@ -19,15 +22,53 @@
 
   let template = 0;
   let templates = [
+
+   //
+   //  { // manager-window
+   //    _id:'',
+   //    caption:'Manager',
+   //    component:'Manager',
+   //    left:'10px', top:'10px', width:'1024px', height:'768px', zIndex:2
+   // },
+
+
     {
         _id: '_design/',
         views: {
-          view1: {
+          desktops: {
+            // list all desktops, set key to desktop
+            map: ( ({type, _id}) => { emit(type, _id) } ).toString()
+          },
+          windows: {
+            // list all windows for a specific desktop
+            map: ( ({type, desktop, _id}) => { emit([type, desktop], _id) } ).toString()
+          },
+        },
+        filters: {}
+      },
+
+
+
+
+    {
+        _id: '_design/',
+        views: {
+          tabs: {
+            map: ( ({_id}) => {emit(_id)} ).toString()
+          },
+          cards: {
             map: ( ({_id}) => {emit(_id)} ).toString()
           },
         },
         filters: {}
       }
+
+
+
+
+
+
+
   ];
 
   function validateName(name){
@@ -54,7 +95,7 @@
       },
 
       longEnough: {
-        test: name.length > 6,
+        test: name.length >= 4,
         message:'name too short'
       },
 
@@ -78,16 +119,37 @@
     const ddoc = lo.cloneDeep(templates[template]);
     ddoc._id += session.name;
 
+    console.log(ddoc);
+
+    // try{
+    //
+      // await db.remove(await db.get('_design/tabs'));
+    //   await db.remove(await db.get('_design/hello_world'));
+    //   await db.remove(await db.get('_design/layoutsapplications'));
+    //   await db.remove(await db.get('_design/layoutsapplicationsdddddddd'));
+    //   await db.remove(await db.get('_design/qqqqqqqqq'));
+    //   await db.remove(await db.get('_design/wwwwwww'));
+    //
+    // }catch{}
+
+    try{
+    const existing = await db.get( ddoc._id );
+    ddoc._rev = existing._rev;
+    }catch{}
+
     try{
       await db.put(  ddoc );
     }catch(e){
       error = JSON.stringify(e);
+      console.log(e);
+
     }
 
     session = {
       name:'',
     };
     active = false;
+
   }
 
 </script>

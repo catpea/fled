@@ -6,8 +6,9 @@
   import Locations from './Locations.svelte';
   import Display from './Display.svelte';
   import Context from './Context.svelte';
-  // import Creator from './Creator.svelte';
+  import Creator from './Creator.svelte';
   import Editor from './Editor.svelte';
+  import Actions from './Actions.svelte';
 
   import { db, document, location, selection } from './store.js';
 
@@ -16,10 +17,11 @@
 <Layout>
   <Address slot="header"/>
   <Locations slot="locations"/>
-  <!-- <Creator slot="creator"/> -->
+  <Creator slot="creator"/>
   <Display slot="body"/>
   <Editor slot="editor"/>
-  <Context slot="context"/>
+  <!-- <Context slot="context"/> -->
+  <Actions slot="actions"/>
 </Layout>
 
 <!-- <div>document: {JSON.stringify($document)}</div>

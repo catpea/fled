@@ -18,7 +18,6 @@
 
   };
 
-
   //
   let dragging = false;
   let edit = false;
@@ -35,9 +34,7 @@
   }
 
   function itemDropped({to, event}){
-
     for (const type of event.dataTransfer.types) {
-
       let from = -1;
       let doc = {};
       try{
@@ -91,12 +88,15 @@
 /*
   the protocol
 
+  1
   class="card-header" on:mousedown= makes the parent draggable
   on:dragend={(event)=> of the parent cancels that on drag end
 
+  2
   ondragstart we set data type
   the dropzone will evaluate it with canDropHere via lo.intersection(accepts, incoming)
 
+  3
   Then on drop the drop handler is called, and adding/reordering occurs
 
 */
@@ -125,7 +125,7 @@
 
   {#each workingObject.order as doc, index}
 
-    <div class="card text-bg-{doc.context} mb-2" on:dragstart={(event)=>{ provides.map(type=>event.dataTransfer.setData(type, JSON.stringify({from:index, doc})))  }} on:dragend|self={(event)=>{console.log('dragend'); event.target.setAttribute("draggable", "false"); dragging=false}}>
+    <div class="card text-{doc.context} border-{doc.context} mb-2" on:dragstart={(event)=>{ provides.map(type=>event.dataTransfer.setData(type, JSON.stringify({from:index, doc})))  }} on:dragend|self={(event)=>{console.log('dragend'); event.target.setAttribute("draggable", "false"); dragging=false}}>
       <div class="card-header" on:mousedown|self={(event)=>{console.log('mousedown'); if(edit||couldServe) event.target.parentElement.setAttribute("draggable", "true"); dragging=true;}}>
         {doc.title}
       </div>
@@ -139,7 +139,7 @@
     {#if couldAccept&&edit}
       <div transition:slide class="m-0 p-0">
         <div class="py-3">
-          <div class=" border border-secondary p-3 rounded" on:drop={(event)=>itemDropped({to:index+1, event})} on:dragenter={canDropHere} on:dragover={canDropHere}>
+          <div class="border border-secondary p-3 rounded" on:drop={(event)=>itemDropped({to:index+1, event})} on:dragenter={canDropHere} on:dragover={canDropHere}>
             drop after {index+1} element
           </div>
         </div>

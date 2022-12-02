@@ -11,7 +11,7 @@ export class Document {
       this._id = id;
       this.options = options;
       this.value = {};
-      console.log('ccCCCCCCCCC', this.debug);
+      // console.log('ccCCCCCCCCC', this.debug);
     }
 
 
@@ -30,7 +30,7 @@ export class Document {
     const isFirstSubscription = this.#subscribers.length==0;
     if(isFirstSubscription) this.connect(); // connect will be called when the number of subscribers goes from zero to one (but not from one to two, etc).
     this.#subscribers.push(subscriptionFunction);
-    console.log('Document Listener Subscribed');
+    //console.log('Document Listener Subscribed');
 
     this.log(`_id:${this._id}: new subscriber, there are now a total of ${this.#subscribers.length} subscribers.`);
 
@@ -38,7 +38,7 @@ export class Document {
     // Calling an unsubscribe function must stop its subscription,
     // and its corresponding subscription function must not be called again by the store.
     return ()=>{
-      console.log('Document Listener Unsubscribed');
+      //console.log('Document Listener Unsubscribed');
       this.#subscribers.splice(this.#subscribers.indexOf(subscriptionFunction), 1);
       const isLastSubscription = this.#subscribers.length==0;
       if(isLastSubscription) this.disconnect();
@@ -94,11 +94,14 @@ export class Document {
         live: true,
         include_docs: true
       });
+
       this.#changes.on('change', (data)=>{
         this.set(data.doc);
         this.log(`_id:${this._id}: document changed! (Document.js)`);
       });
+
       this.log(`_id:${this._id}: ${this._id} is listening for changes...`);
+
       this.db.get(this._id).then((doc)=>{
         this.set(doc);
         this.log(`_id:${this._id}: initial data has been set`);
@@ -114,7 +117,7 @@ export class Document {
   log(msg){
     if(!this.debug) return;
     this.#log.push(msg);
-    console.log(msg);
+    //console.log(msg);
     this.#spies.map(spy=>spy({msg, log:this.#log}))
   }
 
@@ -124,8 +127,6 @@ export class Document {
     return () => this.#spies.splice(this.#spies.indexOf(sub), 1);
   }
 
-  destroy(){
-    this.disconnect();
-  }
+
 
 }

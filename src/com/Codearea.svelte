@@ -33,7 +33,9 @@
 
 
 
-  const extensions = [basicSetup, javascript(), EditorView.lineWrapping, keymap.of([indentWithTab]), EditorView.updateListener.of((update) => {if (update.docChanged) value = update.state.doc.toString();   })]; //NOTE: EditorView.lineWrapping does not honor code indents
+  const extensions = [basicSetup, javascript(),
+    //EditorView.lineWrapping,
+     keymap.of([indentWithTab]), EditorView.updateListener.of((update) => {if (update.docChanged) value = update.state.doc.toString();   })]; //NOTE: EditorView.lineWrapping does not honor code indents
 
   if(dark) extensions.push(oneDark)
 
@@ -97,12 +99,12 @@
   let menu = false;
 </script>
 
-<div class="card">
+<div class="card" style="overflow-x: scroll;">
 
-<div class="clearfix px-1">
-  <div title="format" on:click={format}><i class="bi bi-braces-asterisk fs-4 float-start ms-2"></i></div>
+  <div class="clearfix px-1">
+    <div title="format" on:click={format}><i class="bi bi-braces-asterisk fs-4 float-start ms-2"></i></div>
+  </div>
 
-</div>
   <hr class="border border-light border-3 opacity-75 my-0">
   <div bind:this={parent}/>
   <hr class="border border-secondary border-3 opacity-75 my-0">

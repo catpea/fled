@@ -10,6 +10,7 @@ export default defineConfig({
       '~com': path.resolve('src/com'),
       '~@fontsource': path.resolve('node_modules/@fontsource'),
       '~bootstrap': path.resolve('node_modules/bootstrap'),
+      '~bootswatch': path.resolve('node_modules/bootswatch'),
     }
   },
   // server: {

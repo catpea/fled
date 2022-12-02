@@ -19,10 +19,12 @@
 
   // sub panes
   let showDesignDocuments = false;
-  let showDocuments = true;
+  let showDocuments = false;
   let showDocumentTree = false;
   let showFavorites = false;
+  let showDashboards = false;
   let showRecentDocuments = false;
+  let showWindows = false;
 
   //  pane
   let showFiles = false;
@@ -30,14 +32,16 @@
   const ddocs = designDocuments(db);
   const docs = allDocuments(db);
 
-  const favorites = new View(db, '_design/favorites/by_name', {key:"yes"});
+  const favorites  = new View({ db, design: 'favorites',  view: 'by_name',    key: 'yes'  });
+  const dashboards = new View({ db, design: 'dashboards', view: 'dashboards', key: 'dash' });
+  const windows = new View({ db, design: 'windows', view: 'windows', key: 'window' });
 
-  $: console.log('favorites', favorites);
+  // $: console.log('favorites', favorites);
 
 
 </script>
 
-<Pane>
+<div class="bg-dark rounded p-1">
 
   <div class="card-body p-1 pb-3">
     <div class="d-flex w-100 justify-content-between ps-1 border-0">
@@ -51,7 +55,7 @@
           <button class="btn btn-link text-decoration-none d-block w-100 text-truncate text-start"
           on:click={()=> document.id = doc._id }
           on:click={()=>{ $selection = []; $location = []; }}
-          class:text-bg-light={$document._id == doc._id}><i class="bi bi-journal-code"></i> {prettyName(doc)}</button>
+          class:text-bg-info={$document._id == doc._id}><i class="bi bi-journal-code"></i> {prettyName(doc)}</button>
         {/each}
       </div>
       </div>
@@ -74,7 +78,7 @@
           <button class="btn btn-link text-decoration-none d-block w-100 text-truncate text-start"
           on:click={()=> document.id = doc._id }
           on:click={()=>{ $selection = []; $location = []; }}
-          class:text-bg-light={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc._id}</button>
+          class:text-bg-info={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc._id}</button>
         {/each}
       </div>
       </div>
@@ -93,13 +97,50 @@
           <button class="btn btn-link text-decoration-none d-block w-100 text-truncate text-start"
           on:click={()=> document.id = doc._id }
           on:click={()=>{ $selection = []; $location = []; }}
-          class:text-bg-light={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc._id}</button>
+          class:text-bg-info={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc._id}</button>
         {/each}
       </div>
       </div>
     {/if}
   </div>
 
+  <div class="card-body p-1 pb-3">
+    <div class="d-flex w-100 justify-content-between ps-1 border-0">
+      <button class="btn btn-link p-0 border-0 opacity-75-hover text-decoration-none" on:click={()=>showWindows=!showWindows}><IconToggle icon="chevron right down" value={showWindows}/> All Windows</button>
+      {#if showWindows}<button transition:fade|local class="btn btn-link p-0 border-0 dopacity-25 opacity-100-hover text-decoration-none" on:click={()=>windows.refresh()} title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>{/if}
+    </div>
+    {#if showWindows}
+      <div transition:slide|local>
+      <div class="ps-3 pt-2">
+        {#each $windows as doc}
+          <button class="btn btn-link text-decoration-none d-block w-100 text-truncate text-start"
+          on:click={()=> document.id = doc._id }
+          on:click={()=>{ $selection = []; $location = []; }}
+          class:text-bg-info={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc.caption}</button>
+        {/each}
+      </div>
+      </div>
+    {/if}
+  </div>
+
+  <div class="card-body p-1 pb-3">
+    <div class="d-flex w-100 justify-content-between ps-1 border-0">
+      <button class="btn btn-link p-0 border-0 opacity-75-hover text-decoration-none" on:click={()=>showDashboards=!showDashboards}><IconToggle icon="chevron right down" value={showDashboards}/> All Dashboards</button>
+      {#if showDashboards}<button transition:fade|local class="btn btn-link p-0 border-0 dopacity-25 opacity-100-hover text-decoration-none" on:click={()=>dashboards.refresh()} title="Refresh"><i class="bi bi-arrow-clockwise"></i></button>{/if}
+    </div>
+    {#if showDashboards}
+      <div transition:slide|local>
+      <div class="ps-3 pt-2">
+        {#each $dashboards as doc}
+          <button class="btn btn-link text-decoration-none d-block w-100 text-truncate text-start"
+          on:click={()=> document.id = doc._id }
+          on:click={()=>{ $selection = []; $location = []; }}
+          class:text-bg-info={$document._id == doc._id}><i class="bi bi-journal-code"></i> {doc.name}</button>
+        {/each}
+      </div>
+      </div>
+    {/if}
+  </div>
 
   <div class="card-body p-1 pb-3">
     <div class="d-flex w-100 justify-content-between ps-1 border-0">
@@ -138,4 +179,4 @@
     {/if}
   </div>
 
-</Pane>
+</div>

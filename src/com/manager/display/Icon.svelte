@@ -8,7 +8,7 @@
 
 </script>
 
-<div class="d-inline rounded m-1 me-3 p-2" role="button" title="{name}" style="user-select: none;" class:text-bg-light={selected}>
+<div class="d-inline rounded m-1 me-3 p-2" role="button" title="{name}" style="user-select: none;" class:text-bg-dark={selected}>
 
     <div class="text-center" on:click|stopPropagation on:dblclick|stopPropagation>
       <i class="bi bi-{icon} text-{context} fs-3 d-inline"></i>

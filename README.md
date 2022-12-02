@@ -2,17 +2,69 @@
 
 HTTP based code editor for functional programming
 
+https://allorigins.win/
 
 ## Developer Note
 
 ### TODO
 
+- electron
+- electronforge
+- Electron Release Server
+- scrapeit
+- File passthrough socket-io proxy that movers files into puichdb for editing
+- Wiki Pane + Vim editor,
+- Midnight COmmander 2 Pane approach
+- Above all Automator for file operations
+- (Tree+Midnight-Comander) Scene Graph Editor where nodes are first the way cells are first in spreadsheet programs
 
-File passthrough socket-io proxy that movers files into puichdb for editing
-Wiki Pane + Vim editor,
-Midnight COmmander 2 Pane approach
-Above all Automator for file operations
-(Tree+Midnight-Comander) Scene Graph Editor where nodes are first the way cells are first in spreadsheet programs
+### Applications
+
+- Drag And Drop Layout Editor
+- Color Theme Designer
+- Web Services Builder
+- Noise Machine
+- Song Beat Coutiner
+- Alone Song Generator
+- Bootstrap Shadow Generator
+- Bootstrap Container Generator
+- BUtton Customizer
+- CSS Box Shadow
+- CSS Text Shadow
+- CSS CSS Cursor
+- CSS Border
+- CSS Border Radius
+- CSS Gradient CSS
+- CSS Transform CSS
+- CSS RGBA & Hex Color
+- CSS Multiple Columns
+- CSS Filter
+- CSS Border Radius Generator
+- CSS Button Generator
+- CSS Column Generator
+- CSS Flip Swith Generator
+- CSS Gradient Generator
+- CSS Scrollbar Generator
+- CSS Image Filters
+- CSS Layout Generator
+- CSS Sprite Generator
+- CSS Ribbon Generator
+- CSS Text Rotate Generator
+- CSS Tooltip Generator
+- CSS Tooltip Generator
+- CSS 3D Transform Generator
+- CSS Box Shadow Generator
+- CSS Clip Path Generator
+- CSS Cubic Bezier Generator
+- CSS Flexbox Generator
+- CSS Loader Generator
+- CSS Text Gradient Generator
+- CSS Input Range Generator
+- CSS Menu Generator
+- CSS RGBA Generator
+- CSS Text Shadow Generator
+- CSS Ribbon Banner Generator
+- CSS Triangle Generator
 
 
 ### document server
@@ -85,3 +137,11 @@ autocmd BufRead,BufNewFile *.svelte set filetype=html
 ### Things
 
 Finite State Machine
+
+### Scratch
+
+new card
+
+
+Tab for DB operations
+Card To Export DB
