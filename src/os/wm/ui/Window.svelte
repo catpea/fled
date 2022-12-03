@@ -23,7 +23,7 @@
 
 </script>
 
-<div transition:fade use:draggableWindow use:resizableWindow={{dot}} use:focusableWindow class="position-absolute card border border-secondary border-5 border-opacity-25" style="left:{doc.left}; top:{doc.top}; width:{doc.width}; height:{doc.height};">
+<div transition:fade use:draggableWindow use:resizableWindow={{dot}} use:focusableWindow class="window position-absolute card d-block border border-secondary border-5 border-opacity-25 overflow-auto" style="left:{doc.left}; top:{doc.top}; width:{doc.width}; height:{doc.height};">
   <div class="card-header drag-handle">
     I am caption
   </div>

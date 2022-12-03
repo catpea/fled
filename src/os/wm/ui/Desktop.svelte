@@ -24,7 +24,7 @@ import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
 
 
 <div transition:fade use:pannableDesktop class="position-absolute w-100 h-100 desktop-background"></div>
-<div transition:fade class="position-absolute w-100 h-100">
+<div transition:fade class="position-absolute w-100 h-100 pe-none">
 {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill}}
 <div class="text-danger">{x1},{y1},{x2},{y2}, {x},{y},{r}, {fill}</div>
 {/each}
@@ -34,7 +34,7 @@ import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
   <!-- <circle cx="333" cy="777" r="50" fill="red" class=""/> -->
   {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill,stroke}}
     {#if x1}
-    <rect transition:fade x={x1} y={y1} width={x2-x1} height={y2-y1} stroke={stroke||'green'} strokeWidth="1"fill={fill||'green'}/>
+    <rect transition:fade x={x1} y={y1} width={x2-x1} height={y2-y1} stroke={stroke||'green'} strokeWidth="0.1" fill={fill||'green'}/>
     {:else}
     <circle transition:fade cx={x} cy={y} r={r||10} fill={fill||'green'}/>
     {/if}
