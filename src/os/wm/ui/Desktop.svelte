@@ -23,7 +23,7 @@ import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
 </style>
 
 
-<div transition:fade use:pannableDesktop class="position-absolute w-100 h-100 desktop-background"></div>
+<div transition:fade use:pannableDesktop on:panend={()=>console.log('on:panend')} class="position-absolute w-100 h-100 desktop-background"></div>
 <div transition:fade class="position-absolute w-100 h-100 pe-none">
 {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill}}
 <div class="text-danger">{x1},{y1},{x2},{y2}, {x},{y},{r}, {fill}</div>

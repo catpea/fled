@@ -25,9 +25,9 @@ export function resizableWindow(node, {dot}){
     configureMovement,
     shareState,
     resizeWindow,
+    fireResize,
   ]);
   const cursors = lo.flow([
-
     configureMovement,
     defineCursorPosition,
     defineBoundingBox,
@@ -45,10 +45,13 @@ export function resizableWindow(node, {dot}){
     getHits,
     setCursor,
     activateResizing,
-    setPreviousCursor
+    setPreviousCursor,
+    fireResizeStart,
   ]);
   const deactivation = lo.flow([
-    deactivateResizing
+    configureMovement,
+    deactivateResizing,
+    fireResizeEnd,
   ]);
 
   addEventListener('mousemove', cursors,  false);
@@ -56,8 +59,45 @@ export function resizableWindow(node, {dot}){
   addEventListener('mouseup',   deactivation, false);
   addEventListener('mousemove', resizing,  false);
 
+  function fireResize(o){
+    const detail = {
+      top: o.node.style.top,
+      left: o.node.style.left,
+      width: o.node.style.width,
+      height: o.node.style.height,
+    };
+    node.dispatchEvent(new CustomEvent('resize', { detail }));
+    return o;
+  }
+
+  function fireResizeStart(o){
+    const detail = {
+      top: o.node.style.top,
+      left: o.node.style.left,
+      width: o.node.style.width,
+      height: o.node.style.height,
+    };
+    node.dispatchEvent(new CustomEvent('resizestart', { detail }));
+    return o;
+  }
+
+  function fireResizeEnd(o){
+
+    if(!active.horizontal&&!active.vertical) return o;
+
+    const detail = {
+      top: o.node.style.top,
+      left: o.node.style.left,
+      width: o.node.style.width,
+      height: o.node.style.height,
+    };
+    node.dispatchEvent(new CustomEvent('resizeend', { detail }));
+    return o;
+  }
+
   function configureMovement(event){
-    event.preventDefault();
+    //event.preventDefault();
+
     return { node, event }
   }
 
@@ -206,6 +246,9 @@ export function resizableWindow(node, {dot}){
 
   function activateResizing(o){
     if(Object.entries(o.hits).length==0) return o;
+    window.getSelection().removeAllRanges(); // not a good idea becasue the user would lose selection when dragging an editor window
+    // bodyOriginalUserSelectVal = document.body.style.userSelect;
+    document.body.style.userSelect = 'none';
     const selection = Object.entries(o.hits).pop();
     const [name, {horizontal, vertical}] = selection;
     active.horizontal = horizontal;
@@ -221,7 +264,7 @@ export function resizableWindow(node, {dot}){
 
   function resizeWindow(o){
     if( !active.horizontal && !active.vertical) return o;
-    o.event.preventDefault();
+    // o.event.preventDefault();
 
     // Calculate New Position
     const currentPointerX = o.event.clientX;
@@ -229,6 +272,7 @@ export function resizableWindow(node, {dot}){
 
     let dragMovementX = currentPointerX - o.shared.previousPointerX; /* rounding errors in event.movementX; */
     let dragMovementY = currentPointerY - o.shared.previousPointerY; /* rounding errors in event.movementY; */
+
 
 
     if(active.horizontal=='left'){

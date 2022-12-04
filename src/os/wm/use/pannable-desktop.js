@@ -5,23 +5,23 @@ export function pannableDesktop(node){
       let previousPointerY = 0;
 
       async function panStart(event){
-        console.log('panStart');
         if(event.target !== node) return;
         active = true;
         previousPointerX = event.clientX;
         previousPointerY = event.clientY;
+        const detail = {};
+        node.dispatchEvent(new CustomEvent('panstart', { detail }));
       }
 
       async function pan(event){
         if (!active) return;
-        event.preventDefault();
+        //event.preventDefault();
 
         if(cursorOut(event)){
         //  active = false;
           return;
         }
 
-        console.log('Dragging');
 
         const currentPointerX = event.clientX;
         const currentPointerY = event.clientY;
@@ -31,13 +31,11 @@ export function pannableDesktop(node){
 
         if( !dragMovementX && !dragMovementY ) return;
 
-        console.log({dragMovementY, dragMovementX});
 
         const windows = [...node.parentNode.children].filter((child) => child !== node).filter(el => el.matches('div.card.window'));
 
 
         for (let win of windows) {
-          console.log({old:win.style.left, new:parseInt(win.style.left) + dragMovementX +'px'});
           win.style.top = parseInt(win.style.top) + dragMovementY +'px';
           win.style.left = parseInt(win.style.left) + dragMovementX +'px';
         }
@@ -45,12 +43,16 @@ export function pannableDesktop(node){
         // Prepare For Next Iteration
         previousPointerX = currentPointerX;
         previousPointerY = currentPointerY;
+        const detail = {};
+        node.dispatchEvent(new CustomEvent('pan', { detail }));
       }
 
 
       async function panEnd(event){
         if (!active) return;
         active = false;
+        const detail = {};
+        node.dispatchEvent(new CustomEvent('panend', { detail }));
       }
 
       function cursorOut(event){
@@ -70,8 +72,6 @@ export function pannableDesktop(node){
         const cursorOverflowLeft =   (event.clientX-parseInt(desktopStyle.border)) <= dx1-gap;
         const cursorOverflowBottom =  (event.clientY-parseInt(desktopStyle.border)) >= dy2-gap;
 
-        // //console.log({cursorOverflowTop, cursorOverflowRight, cursorOverflowLeft, cursorOverflowBottom,});
-
         if(cursorOverflowTop||cursorOverflowRight||cursorOverflowLeft||cursorOverflowBottom){
           return true
         }else{
@@ -81,6 +81,6 @@ export function pannableDesktop(node){
 
       // node.addEventListener('mouseleave', panEnd, false);
       addEventListener('mousemove',  pan, false);
-      node.addEventListener('mousedown',  panStart, false);
-      node.addEventListener('mouseup',    panEnd, false);
+      node.addEventListener('mousedown', panStart, false);
+      addEventListener('mouseup',    panEnd, false);
 }

@@ -3,6 +3,8 @@ import PouchDB from 'pouchdb-browser';
 import pouchdbFind from 'pouchdb-find';
 
 let assignQueue = {};
+let mergeQueue = [];
+
 PouchDB
   .plugin(pouchdbFind)
   .plugin({
@@ -29,11 +31,26 @@ PouchDB
       return (await this.allDocs({ include_docs:true })).rows;
     },
 
-    assignNow: async function(id, ...objects){
-      const existing = await this.get(id);
-      const updated = lo.assign({}, existing, ...objects.map(obj=>lo.omit(obj, ['_id', '_rev'])))
-      this.put(updated);
-    },
+
+  // 
+  //   mergeCommit: async function(){
+  //     try {
+  //       console.log(mergeQueue);
+  //       const result = await this.bulkDocs(mergeQueue);
+  //       console.log(result);
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   },
+  //
+  //   merge: async function(id, ...objects){
+  //     const existing = await this.get(id);
+  //     const updated = lo.assign({}, existing, ...objects.map(obj=>lo.omit(obj, ['_id', '_rev'])))
+  //     mergeQueue.push(lo.omit(updated, ['_rev']));
+  //     if(!this.mergeDebounced) this.mergeDebounced = lo.debounce(this.mergeCommit, 500);
+  //
+  // this.mergeDebounced()
+  //   },
 
 
     assignCommit: async function(){
@@ -60,7 +77,7 @@ PouchDB
       assignQueue[id] = lo.assign({}, assignQueue[id], ...objects);
       assignQueue[id] = lo.omit(assignQueue[id], Object.entries(assignQueue[id]).filter(([key,val])=>val===undefined).map(([key,val])=>key) );
 
-      console.log( JSON.stringify(assignQueue) );
+      // console.log( JSON.stringify(assignQueue) );
       // console.log( assignQueue );
       if(!this.assignCommitDebounced) this.assignCommitDebounced = lo.debounce(this.assignCommit, 1000);
 

@@ -6,8 +6,9 @@ import {connect} from '/src/svelte-pouchdb/connect.js';
 
 // exported for convenience, do not create abstraction layers over PouchDB, use it directly.
 export const db = connect('fled-v1');
+export const sid = 'guid-'+uuid();
 
-export const session   = writable({_id:'guid-'+uuid(), type:'session',  user:'anonymous', valid:false});
+export const session   = writable({_id:sid, type:'session',  user:'anonymous', valid:false});
 
 export const overwatch = writable(true);
 export const desktop   = writable('primary'); // this produces a list of windows

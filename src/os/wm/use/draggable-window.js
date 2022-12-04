@@ -1,18 +1,18 @@
-export function draggableWindow(windowNode, options){
+export function draggableWindow(node, options){
 
-  const desktopNode = [...windowNode.parentNode.children]
-    .filter((child) => child !== windowNode)
+  const desktopNode = [...node.parentNode.children]
+    .filter((child) => child !== node)
     .filter(el => el.matches('.desktop-background')).pop();
 
-  const dragHandle = [...windowNode.children]
+  const dragHandle = [...node.children]
     .filter(el => el.matches('.drag-handle')).pop();
 
   let active = false;
 
   //stats = {...stats, active};
   let bodyOriginalUserSelectVal;
-  //let dragHandle = windowNode;
-//  if(dragHandle) dragHandle = Array.from(windowNode.querySelectorAll(dragHandle).values()).pop();
+  //let dragHandle = node;
+//  if(dragHandle) dragHandle = Array.from(node.querySelectorAll(dragHandle).values()).pop();
 
   let previousPointerX = 0;
   let previousPointerY = 0;
@@ -23,8 +23,8 @@ export function draggableWindow(windowNode, options){
     previousPointerY = event.clientY;
     bodyOriginalUserSelectVal = document.body.style.userSelect;
     document.body.style.userSelect = 'none';
-    //stats = {...stats, active};
-    // windows.pause = true;
+    const detail = {};
+    node.dispatchEvent(new CustomEvent('dragstart', { detail }));
   }
 
   async function dragEnd(){
@@ -32,20 +32,17 @@ export function draggableWindow(windowNode, options){
     // window.getSelection().removeAllRanges(); // not a good idea becasue the user would lose selection when dragging an editor window
     document.body.style.userSelect = bodyOriginalUserSelectVal;
     active = false;
-    //stats = {...stats, active};
-
-    // const updated = Object.assign(await db.get(value._id), lo.omit(value, ['_rev']) );
-    // //console.log(updated);
-    // await db.put(updated);
-    // const { top, left } = value;
-    // db.assign(value._id,  { top, left })
-    // windows.pause = false;
+    const detail = {
+      left: node.style.left,
+      top: node.style.top,
+    };
+    node.dispatchEvent(new CustomEvent('dragend', { detail }));
   }
 
   async function drag(event){
     if (!active) return;
-    event.preventDefault();
-    let windowStyle = window.getComputedStyle(windowNode);
+    //event.preventDefault();
+    let windowStyle = window.getComputedStyle(node);
 
     // Calculate New Position
     const currentPointerX = event.clientX;
@@ -131,14 +128,18 @@ export function draggableWindow(windowNode, options){
 
 
     // Apply Coordinates
-    windowNode.style.left = `${newWindowX}px`;
-    windowNode.style.top = `${newWindowY}px`;
+    node.style.left = `${newWindowX}px`;
+    node.style.top = `${newWindowY}px`;
 
     // Prepare For Next Iteration
     previousPointerX = currentPointerX;
     previousPointerY = currentPointerY;
 
-    //stickers = stickers;
+    const detail = {
+      left: node.style.left,
+      top: node.style.top,
+    };
+    node.dispatchEvent(new CustomEvent('drag', { detail }));
   }
 
 
