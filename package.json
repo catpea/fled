@@ -30,6 +30,7 @@
     "dot-object": "^2.1.4",
     "ejs": "^3.1.8",
     "events": "^3.3.0",
+    "fast-json-patch": "^3.1.1",
     "highlight.js": "^11.6.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",

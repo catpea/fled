@@ -7,11 +7,11 @@
 
 </script>
 
-<div class="position-fixed w-100 h-100">
+<div class="position-fixed w-100 h-100"> <!-- everything is stored in this tag, without nesting -->
   <Login>
     <Overwatch>
       <Desktop>
-        <Windows/>
+        <Windows/> <!-- contains multiple windows -->
       </Desktop>
     </Overwatch>
   </Login>

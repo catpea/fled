@@ -3,31 +3,46 @@ import { v4 as uuid } from 'uuid';
 
 export function resizableWindow(node, {dot}){
 
-  // a good way to resize a window is to drag the window border
-  // a more advanced interesting way, is to hold CTRL and move mouse, where moving down+right will expand the window down+right
-  // TODO: use a cursor
 
-  //////////////////////////////////////////////////////////////////////////////
+  let resized = false;
+  let old = [node.style.left, node.style.width, node.style.height, node.style.top];
 
   const active = {
     horizontal:false,
     vertical:false
   };
 
+
   const shared = {
     previousPointerX: 0,
     previousPointerY: 0,
+
+    // stores the result
+    top: node.style.top?parseInt(node.style.top):'',
+    left: node.style.left?parseInt(node.style.left):'',
+    width: node.style.width?parseInt(node.style.width):'',
+    height: node.style.height?parseInt(node.style.height):'',
+
+    previousTop: node.style.top?parseInt(node.style.top):'',
+    previousLeft: node.style.left?parseInt(node.style.left):'',
+    previousWidth: node.style.width?parseInt(node.style.width):'',
+    previousHeight: node.style.height?parseInt(node.style.height):'',
+
   }
 
-  //////////////////////////////////////////////////////////////////////////////
+
+
+
+
 
   const resizing = lo.flow([
-    configureMovement,
+     configureMovement,
     shareState,
     resizeWindow,
     fireResize,
   ]);
   const cursors = lo.flow([
+
     configureMovement,
     defineCursorPosition,
     defineBoundingBox,
@@ -37,6 +52,8 @@ export function resizableWindow(node, {dot}){
 
   ]);
   const activation = lo.flow([
+    (e)=>{resized=false; return e},
+    (e)=>{old = [node.style.left, node.style.width, node.style.height, node.style.top]; return e},
     configureMovement,
     shareState,
     defineCursorPosition,
@@ -50,48 +67,63 @@ export function resizableWindow(node, {dot}){
   ]);
   const deactivation = lo.flow([
     configureMovement,
-    deactivateResizing,
+    shareState,
     fireResizeEnd,
+    deactivateResizing,
+
+    (e)=>{resized=false; return e},
   ]);
 
-  addEventListener('mousemove', cursors,  false);
-  addEventListener('mousedown', activation,  false);
-  addEventListener('mouseup',   deactivation, false);
-  addEventListener('mousemove', resizing,  false);
-
   function fireResize(o){
-    const detail = {
-      top: o.node.style.top,
-      left: o.node.style.left,
-      width: o.node.style.width,
-      height: o.node.style.height,
-    };
+    const detail = {};
+    if(o.shared.top != o.shared.previousTop) detail.top = `${o.shared.top}px`;
+    if(o.shared.left != o.shared.previousLeft) detail.left = `${o.shared.left}px`;
+    if(o.shared.width != o.shared.previousWidth) detail.width = `${o.shared.width}px`;
+    if(o.shared.height != o.shared.previousHeight) detail.height = `${o.shared.height}px`;
     node.dispatchEvent(new CustomEvent('resize', { detail }));
     return o;
   }
 
   function fireResizeStart(o){
-    const detail = {
-      top: o.node.style.top,
-      left: o.node.style.left,
-      width: o.node.style.width,
-      height: o.node.style.height,
-    };
+    const detail = {};
+    if(o.shared.top != o.shared.previousTop) detail.top = `${o.shared.top}px`;
+    if(o.shared.left != o.shared.previousLeft) detail.left = `${o.shared.left}px`;
+    if(o.shared.width != o.shared.previousWidth) detail.width = `${o.shared.width}px`;
+    if(o.shared.height != o.shared.previousHeight) detail.height = `${o.shared.height}px`;
     node.dispatchEvent(new CustomEvent('resizestart', { detail }));
     return o;
   }
 
   function fireResizeEnd(o){
 
-    if(!active.horizontal&&!active.vertical) return o;
 
-    const detail = {
-      top: o.node.style.top,
-      left: o.node.style.left,
-      width: o.node.style.width,
-      height: o.node.style.height,
-    };
+
+    if(!resized){
+      return o;
+    }
+
+    const detail = {};
+    if(o.shared.top != o.shared.previousTop) detail.top = `${o.shared.top}px`;
+    if(o.shared.left != o.shared.previousLeft) detail.left = `${o.shared.left}px`;
+    if(o.shared.width != o.shared.previousWidth) detail.width = `${o.shared.width}px`;
+    if(o.shared.height != o.shared.previousHeight) detail.height = `${o.shared.height}px`;
     node.dispatchEvent(new CustomEvent('resizeend', { detail }));
+
+
+
+
+    o.shared.previousTop = node.style.top?parseInt(node.style.top):'';
+    o.shared.previousLeft = node.style.left?parseInt(node.style.left):'';
+    o.shared.previousWidth = node.style.width?parseInt(node.style.width):'';
+    o.shared.previousHeight = node.style.height?parseInt(node.style.height):'';
+
+    o.shared.top = node.style.top?parseInt(node.style.top):'';
+    o.shared.left = node.style.left?parseInt(node.style.left):'';
+    o.shared.width = node.style.width?parseInt(node.style.width):'';
+    o.shared.height = node.style.height?parseInt(node.style.height):'';
+
+
+
     return o;
   }
 
@@ -120,7 +152,7 @@ export function resizableWindow(node, {dot}){
     let y2 = o.node.getBoundingClientRect().height;
     [x1,x2] = [x1,x2].map(x=>x+o.node.getBoundingClientRect().left);
     [y1,y2] = [y1,y2].map(x=>x+o.node.getBoundingClientRect().top);
-    const window = {x1,y1,x2,y2};
+    const window = {x1, y1, x2, y2};
     return {...o, window};
   }
 
@@ -142,7 +174,6 @@ export function resizableWindow(node, {dot}){
       x2: left+width,
       y2: top+gap,
     };
-
     const se = {
       cursor: 'se',
       horizontal: 'width',
@@ -152,7 +183,6 @@ export function resizableWindow(node, {dot}){
       x2: left+width,
       y2: top+height,
     };
-
     const nw = {
       cursor: 'nw',
       horizontal: 'left',
@@ -162,7 +192,6 @@ export function resizableWindow(node, {dot}){
       x2: left+gap,
       y2: top+gap,
     };
-
     const sw = {
       cursor: 'sw',
       horizontal: 'left',
@@ -172,7 +201,6 @@ export function resizableWindow(node, {dot}){
       x2: left+gap,
       y2: top+height,
     };
-
     const n = {
       cursor: 'n',
       horizontal: null,
@@ -209,8 +237,7 @@ export function resizableWindow(node, {dot}){
       y1: top+gap,
       y2: top+height
     }
-
-    const zones = {n,e,s,w ,ne,nw,se,sw,};
+    const zones = {n, e, s, w,    ne, nw, se, sw};
     return {...o, zones};
   }
 
@@ -264,7 +291,8 @@ export function resizableWindow(node, {dot}){
 
   function resizeWindow(o){
     if( !active.horizontal && !active.vertical) return o;
-    // o.event.preventDefault();
+
+    o.event.preventDefault();
 
     // Calculate New Position
     const currentPointerX = o.event.clientX;
@@ -273,13 +301,19 @@ export function resizableWindow(node, {dot}){
     let dragMovementX = currentPointerX - o.shared.previousPointerX; /* rounding errors in event.movementX; */
     let dragMovementY = currentPointerY - o.shared.previousPointerY; /* rounding errors in event.movementY; */
 
-
+    // const top = o.node.getBoundingClientRect().top;
+    // const left = o.node.getBoundingClientRect().left;
+    // const width = o.node.getBoundingClientRect().width;
+    // const height = o.node.getBoundingClientRect().height;
 
     if(active.horizontal=='left'){
       const left = parseInt(o.node.style.left);
       const width = parseInt(o.node.style.width);
+
       const newLeft = left + dragMovementX;
       const newWidth = width - dragMovementX;
+      o.shared.left = newLeft;
+      o.shared.width = newWidth;
       o.node.style.left = newLeft + 'px';
       o.node.style.width = newWidth + 'px';
     }
@@ -287,6 +321,7 @@ export function resizableWindow(node, {dot}){
     if(active.horizontal=='width'){
       const width = parseInt(o.node.style.width);
       const newWidth = width + dragMovementX;
+      o.shared.width = newWidth;
       o.node.style.width = newWidth + 'px';
     }
 
@@ -295,6 +330,8 @@ export function resizableWindow(node, {dot}){
       const top = parseInt(o.node.style.top);
       const newHeight = height - dragMovementY;
       const newTop = top + dragMovementY;
+      o.shared.top = newTop;
+      o.shared.height = newHeight;
       o.node.style.top = newTop + 'px';
       o.node.style.height = newHeight + 'px';
     }
@@ -302,7 +339,13 @@ export function resizableWindow(node, {dot}){
     if(active.vertical=='height'){
       const height = parseInt(o.node.style.height);
       const newHeight = height + dragMovementY;
+      o.shared.height = newHeight;
       o.node.style.height = newHeight + 'px';
+    }
+
+    const now = [o.node.style.left, o.node.style.width, o.node.style.height, o.node.style.top];
+    if(!now.every((o,i)=>o===old[i])){
+      resized = true
     }
 
     // Prepare For Next Iteration
@@ -311,20 +354,37 @@ export function resizableWindow(node, {dot}){
     return o;
   }
 
+  function install(){
+    console.log(`resizable-window install`);
+    addEventListener('mousemove', cursors,  false);
+    addEventListener('mousedown', activation,  false);
+    addEventListener('mouseup',   deactivation, false);
+    addEventListener('mousemove', resizing,  false);
+  }
+
+  function uninstall(){
+    console.log(`resizable-window uninstall`);
+    removeEventListener('mousemove', cursors);
+    removeEventListener('mousedown', activation);
+    removeEventListener('mouseup',   deactivation);
+    removeEventListener('mousemove', resizing);
+  }
+
+  install();
+
+  return {
+      update: (newParams) => {
+          uninstall();
+          install();
+      },
+      destroy: () => {
+          uninstall();
+      }
+  }
+
 }
 
-
-
-
-
-
-
-
-
-
-
-
-function within({x,y},{x1,y1,x2,y2}){
+function within({x,y},{x1,y1,x2,y2 }){
   let result = false;
   if(x>=x1 && y>=y1 && x<=x2 && y<=y2) result = true;
   return result;

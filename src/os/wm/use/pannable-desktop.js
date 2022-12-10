@@ -1,5 +1,6 @@
 export function pannableDesktop(node){
 
+      let panned = false;
       let active = false;
       let previousPointerX = 0;
       let previousPointerY = 0;
@@ -22,6 +23,7 @@ export function pannableDesktop(node){
           return;
         }
 
+        panned = true;
 
         const currentPointerX = event.clientX;
         const currentPointerY = event.clientY;
@@ -43,6 +45,7 @@ export function pannableDesktop(node){
         // Prepare For Next Iteration
         previousPointerX = currentPointerX;
         previousPointerY = currentPointerY;
+
         const detail = {};
         node.dispatchEvent(new CustomEvent('pan', { detail }));
       }
@@ -51,8 +54,10 @@ export function pannableDesktop(node){
       async function panEnd(event){
         if (!active) return;
         active = false;
+        if (!panned) return;
         const detail = {};
         node.dispatchEvent(new CustomEvent('panend', { detail }));
+        panned = false
       }
 
       function cursorOut(event){
@@ -79,8 +84,32 @@ export function pannableDesktop(node){
         }
       }
 
+    function install(){
+      console.log(`pannable-window install`);
       // node.addEventListener('mouseleave', panEnd, false);
       addEventListener('mousemove',  pan, false);
       node.addEventListener('mousedown', panStart, false);
       addEventListener('mouseup',    panEnd, false);
+    }
+
+    function uninstall(){
+      console.log(`pannable-window uninstall`);
+      // node.removeEventListener('mouseleave', panEnd);
+      removeEventListener('mousemove',  pan);
+      node.removeEventListener('mousedown', panStart);
+      removeEventListener('mouseup',    panEnd);
+    }
+
+    install();
+
+    return {
+        update: (newParams) => {
+            uninstall();
+            install();
+        },
+        destroy: () => {
+            uninstall();
+        }
+    }
+
 }

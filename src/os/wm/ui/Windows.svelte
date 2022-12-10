@@ -4,25 +4,26 @@
 */
 
 import lo from 'lodash';
-
 import { onMount, onDestroy, createEventDispatcher } from 'svelte';
 import { slide, fade } from 'svelte/transition';
-
 import Window from './Window.svelte';
-
-import { db, desktop, session, sid } from '../store.js';
+import { bus, db, desktop, session, sid } from '../store.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 let windows = [];
 $: if($desktop){updateWindows($desktop)};
 // monitor for changes to the design document it self.
+
 const sep = '/';
 const designPrefix = '_design';
 const designDocument = 'desktops';
 const designView = 'windows';
+
 let designDocumentChanges;
 let viewResultChanges;
+
 onWindows();
+
 function onWindows(){
   offWindows()
   designDocumentChanges = db.changes({ doc_ids:[[designPrefix, designDocument].join('/')], since: 'now', live: true, include_docs: true });
@@ -30,23 +31,17 @@ function onWindows(){
   designDocumentChanges.on('change', onWindows);
   viewResultChanges.on('change', updateWindows);
 }
+
 function updateWindows(){
   db.query([designDocument, designView].join('/'), { key: ['window', $desktop], include_docs: true }).then((data)=>{
     windows = lo.orderBy(data.rows.map(row=>row.doc), ['zIndex'],['desc'] );
     // windows =  data.rows.map(row=>row.doc);
   });
 }
+
 function offWindows(){
   if(designDocumentChanges) designDocumentChanges.cancel();
   if(viewResultChanges) viewResultChanges.cancel();
-}
-////////////////////////////////////////////////////////////////////////////////
-
-function reorder({ _id, order }){
-  console.log(`bring ${_id} to front`, order);
-  for (let {_id, zIndex} of order) {
-    db.assign(_id, {sid}, {zIndex})
-  }
 }
 
 onDestroy(()=>{
@@ -56,6 +51,6 @@ onDestroy(()=>{
 </script>
 
 
-{#each windows as window (window._id)}
-  <Window _id={window._id} on:selected={({detail})=>reorder(detail)}/>
+{#each windows as window, index (window._id)}
+  <Window _id={window._id}/>
 {/each}

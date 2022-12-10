@@ -1,158 +1,203 @@
-export function draggableWindow(node, options){
+import lo from 'lodash';
+import { v4 as uuid } from 'uuid';
 
-  const desktopNode = [...node.parentNode.children]
-    .filter((child) => child !== node)
-    .filter(el => el.matches('.desktop-background')).pop();
+import {setThis, dumpThis} from './lib/fancy.js';
 
-  const dragHandle = [...node.children]
-    .filter(el => el.matches('.drag-handle')).pop();
+export function draggableWindow(node, {dot}){
 
-  let active = false;
+  let dragged = false;
+  const shared = {
+    inProgress: false,
+    dx:-1, dy:-1, // to calculate drag delta.
+    userSelect:null, // original user select value
+    x:0,y:0, // final movement shared across actions
+  };
 
-  //stats = {...stats, active};
-  let bodyOriginalUserSelectVal;
-  //let dragHandle = node;
-//  if(dragHandle) dragHandle = Array.from(node.querySelectorAll(dragHandle).values()).pop();
+  const desktop = [...node.parentNode.children].filter((child) => child !== node).filter(el => el.matches('.desktop-background')).pop();
+  const handle = [...node.children].filter(el => el.matches('.drag-handle')).pop();
+  const configureBoundingBoxes = [
+    defineCursorPosition,
+    defineWindowBoundingBox,
+    defineHandleBoundingBox,
+    getHits,
+  ];
+  const adjustPosition = [
+    calculateMovement,
+    performMovement,
+    commitMovement,
+    dispatchDrag,
+  ];
+  const cursors      = lo.flow([ ...configureBoundingBoxes, /* showHits, */ showCursor, ]);
+  const activation   = lo.flow([()=>dragged=false, initializeMovement, ...configureBoundingBoxes, activateDrag,   showCursor, dispatchDragStart]);
+  const deactivation = lo.flow([ ...configureBoundingBoxes, deactivateDrag, showCursor, dispatchDragEnd, ()=>dragged=false]);
+  const drag         = lo.flow([ ()=>dragged=true, disableUserSelect, ...configureBoundingBoxes, ...adjustPosition, reenableUserSelect ]);
 
-  let previousPointerX = 0;
-  let previousPointerY = 0;
-
-  function dragStart(){
-    active = true;
-    previousPointerX = event.clientX;
-    previousPointerY = event.clientY;
-    bodyOriginalUserSelectVal = document.body.style.userSelect;
+  function disableUserSelect(){
+    this.userSelect = document.body.style.userSelect;
     document.body.style.userSelect = 'none';
-    const detail = {};
-    node.dispatchEvent(new CustomEvent('dragstart', { detail }));
+     window.getSelection().removeAllRanges();
   }
 
-  async function dragEnd(){
-    if (!active) return;
-    // window.getSelection().removeAllRanges(); // not a good idea becasue the user would lose selection when dragging an editor window
-    document.body.style.userSelect = bodyOriginalUserSelectVal;
-    active = false;
-    const detail = {
-      left: node.style.left,
-      top: node.style.top,
-    };
-    node.dispatchEvent(new CustomEvent('dragend', { detail }));
+  function reenableUserSelect(){
+    document.body.style.userSelect = this.userSelect;
   }
 
-  async function drag(event){
-    if (!active) return;
-    //event.preventDefault();
-    let windowStyle = window.getComputedStyle(node);
+  function initializeMovement(){
+    Object.assign( this.shared, { dx: this.event.clientX, dy: this.event.clientY });
+  }
 
-    // Calculate New Position
-    const currentPointerX = event.clientX;
-    const currentPointerY = event.clientY;
+  function calculateMovement(){
+    let dx = this.event.clientX - this.shared.dx;
+    let dy = this.event.clientY - this.shared.dy
+    this.movement = Object.assign({}, this.movement, { dx, dy });
+  }
 
-    let dragMovementX = currentPointerX - previousPointerX; /* rounding errors in event.movementX; */
-    let dragMovementY = currentPointerY - previousPointerY; /* rounding errors in event.movementY; */
-
+  function performMovement(){
+    const { dx, dy } = this.movement;
+    let windowStyle = window.getComputedStyle(this.node);
     let currentWindowX = parseInt(windowStyle.left);
     let currentWindowY = parseInt(windowStyle.top);
+    this.shared.x = currentWindowX + dx;
+    this.shared.y = currentWindowY + dy;
+    this.node.style.left = `${this.shared.x}px`;
+    this.node.style.top = `${this.shared.y}px`;
+  }
 
-    let newWindowX = currentWindowX + dragMovementX;
-    let newWindowY = currentWindowY + dragMovementY;
-    // stats = {...stats, newWindowX, newWindowY};
+  function commitMovement(){
+    let dx = this.event.clientX;
+    let dy = this.event.clientY;
+    Object.assign( this.shared, { dx, dy });
+  }
 
-    // Calculate Bounding Box
-
-    let desktopStyle = window.getComputedStyle(desktopNode);
-    let desktopRect = desktopNode.getBoundingClientRect();
-    let dragRect  = dragHandle.getBoundingClientRect();
-    let windowHeight = parseInt(windowStyle.height);
-
-    let dx1 = desktopRect.x;
-    let dy1 = desktopRect.y;
-    let dy2 = desktopRect.bottom - (parseInt(desktopStyle.border)*2);
-    let dx2 = desktopRect.right - (parseInt(desktopStyle.border)*2);
-
-    ///////////////////////// $dots = {...$dots, ten:{x:10, y:10, fill:'red'} };
-    ///////////////////////$dots = {...$dots, d1:{x:dx1, y:dy1, fill:'green'} };
-    ///////////////////////$dots = {...$dots, d2:{x:dx2, y:dy2, fill:'blue'} };
-
-    // //console.log( parseInt(desktopStyle.border),  parseFloat(desktopStyle.border) );
-    ///////////////////////// //console.log( $dots);
-
-
-    let wx1 = dragRect.x;
-    let wy1 = dragRect.y;
-    let wy2 = dragRect.bottom;
-    let wx2 = dragRect.right;
-    let wh  =  wy2-wy1;
-    let ww  =  wx2-wx1;
-    let wc  =  (wx2-wx1)/2;
-
-    let topGap = wy1-dy1;
-    let bottomGap = dy2-wy2;
-
-    let leftGap = wx1-dx1+wc;
-    let rightGap = dx2-wx2+wc;
-
-    let gap = 0; // gap from edge of view
-    let off = .90 // percent of window that can be hidden by dragging to the side.
-    let safeTop = gap;
-    let safeBottom = dy2-dy1-wh-gap;
-    let safeLeft = gap-(wc*(1+off));
-    let safeRight = dx2-dx1-ww-gap+(wc*(1+off));
-
-    // if(topGap<0) newWindowY = safeTop;
-    // if(bottomGap<0) newWindowY = safeBottom;
-    // if(leftGap<0) newWindowX = safeLeft;
-    // if(rightGap<0) newWindowX = safeRight;
-
-    // stats = {...stats, topGap, bottomGap, leftGap, rightGap, };
-
-    if(1){
-      // Cursor Overflow
-      const clientWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-      const clientHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-      const cursorOverflowTop =    (event.clientY-parseInt(desktopStyle.borderWidth)) < dy1;
-      const cursorOverflowRight =  (event.clientX-parseInt(desktopStyle.borderWidth)) > dx2;
-      const cursorOverflowLeft =   (event.clientX-parseInt(desktopStyle.borderWidth)) < dx1;
-      const cursorOverflowBottom =  (event.clientY-parseInt(desktopStyle.borderWidth)) > dy2;
-      if(cursorOverflowTop && currentWindowY == safeTop) newWindowY = safeTop;
-      if(cursorOverflowBottom) newWindowY = safeBottom;
-      if(cursorOverflowLeft && currentWindowX == safeLeft) newWindowX = safeLeft;
-      if(cursorOverflowRight && currentWindowX == safeRight) newWindowX = safeRight;
-
-      // Stable Margins
-      if(newWindowY<safeTop) newWindowY = safeTop;
-      if(newWindowY>safeBottom) newWindowY=safeBottom;
-      if(newWindowX<safeLeft) newWindowX = safeLeft;
-      if(newWindowX>safeRight) newWindowX = safeRight;
-    }
-
-
-    // Apply Coordinates
-    node.style.left = `${newWindowX}px`;
-    node.style.top = `${newWindowY}px`;
-
-    // Prepare For Next Iteration
-    previousPointerX = currentPointerX;
-    previousPointerY = currentPointerY;
-
+  function dispatchDragStart(){
     const detail = {
-      left: node.style.left,
-      top: node.style.top,
+      left: `${this.shared.x}px`,
+      top: `${this.shared.y}px`,
     };
-    node.dispatchEvent(new CustomEvent('drag', { detail }));
+    this.node.dispatchEvent(new CustomEvent('dragstart', { detail }));
+  }
+
+  function dispatchDrag(){
+    const detail = {
+      left: `${this.shared.x}px`,
+      top: `${this.shared.y}px`,
+    };
+    this.node.dispatchEvent(new CustomEvent('drag', { detail }));
+  }
+
+  function dispatchDragEnd(){
+    if(!dragged) return;
+    const detail = {
+      left: `${this.shared.x}px`,
+      top: `${this.shared.y}px`,
+    };
+    this.node.dispatchEvent(new CustomEvent('dragend', { detail }));
+
+  }
+
+  function defineCursorPosition(){
+    this.cursor = Object.assign({}, this.cursor, { x: this.event.clientX, y: this.event.clientY });
+  }
+
+  function defineWindowBoundingBox(){
+    let x1 = 0;
+    let y1 = 0;
+    let x2 = this.node.getBoundingClientRect().width;
+    let y2 = this.node.getBoundingClientRect().height;
+    [x1,x2] = [x1,x2].map(x=>x+this.node.getBoundingClientRect().left);
+    [y1,y2] = [y1,y2].map(x=>x+this.node.getBoundingClientRect().top);
+    this.bounds = Object.assign({}, this.bounds, {window:{x1,y1,x2,y2}});
+  }
+
+  function defineHandleBoundingBox(){
+    const gap = 5;
+    const top = this.handle.getBoundingClientRect().top;
+    const left = this.handle.getBoundingClientRect().left;
+    const width = this.handle.getBoundingClientRect().width;
+    const height = this.handle.getBoundingClientRect().height;
+    const handle = {
+      x1: left,
+      y1: top+gap,
+      x2: left+width,
+      y2: top+height,
+    };
+    this.bounds = Object.assign({}, this.bounds, {handle});
+  }
+
+  function getHits(){
+    const hits = {};
+    for (var [name, zone] of Object.entries(this.bounds)) {
+      if( within(this.cursor, zone) ) hits[name] = zone;
+    }
+    this.hits = Object.assign({}, hits);
+  }
+
+  function showCursor(){
+    if(this.hits.handle) {
+      if(this.shared.inProgress){
+        this.handle.style.cursor = `grabbing`;
+      }else{
+        this.handle.style.cursor = `grab`;
+      }
+    }else{
+    }
+  }
+
+  function showHits(){
+    for (var [name, zone] of Object.entries(this.hits)) {
+      dot(name, { fill:'none', stroke:'aliceblue',  ...zone} );
+    }
+  }
+
+  function activateDrag(){
+    if(this.hits.handle) {
+      this.shared.inProgress = true;
+    }
+  }
+
+  function deactivateDrag(){
+    this.shared.inProgress = false;
+  }
+
+  function within({x,y},{x1,y1,x2,y2}){
+    let result = false;
+    if(x>=x1 && y>=y1 && x<=x2 && y<=y2) result = true;
+    return result;
   }
 
 
+  const cursorsHandler = (event)=>cursors.bind({shared, node, event, desktop, handle })(null)
+  const activationHandler = (event)=>activation.bind({shared, node, event, desktop, handle })(null)
+  const deactivationHandler = (event)=>deactivation.bind({shared, node, event, desktop, handle })(null)
+  const sharedHandler = (event)=>shared.inProgress?drag.bind({shared, node, event, desktop, handle })(null):0
 
+  function install(){
+    console.log(`draggable-window install`);
+    handle.addEventListener('mousemove', cursorsHandler, false);
+    handle.addEventListener('mousedown', activationHandler, false);
+    addEventListener('mouseup', deactivationHandler, false);
+    addEventListener('mousemove', sharedHandler, false);
 
+  }
 
+  function uninstall(){
+    console.log(`draggable-window uninstall`);
+    handle.removeEventListener('mousemove', cursorsHandler);
+    handle.removeEventListener('mousedown', activationHandler);
+    removeEventListener('mouseup', deactivationHandler);
+    removeEventListener('mousemove', sharedHandler);
+  }
 
+  install();
 
-
-
-  dragHandle.addEventListener('mousedown', dragStart, false);
-  addEventListener('mousemove', drag, false);
-  addEventListener('mouseup', dragEnd, false);
-  // addEventListener('mouseout', dragEnd, false);
+  return {
+      update: (newParams) => {
+          uninstall();
+          install();
+      },
+      destroy: () => {
+          uninstall();
+      }
+  }
 
 }

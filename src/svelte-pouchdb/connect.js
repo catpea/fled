@@ -1,12 +1,23 @@
 import lo from 'lodash';
+import dot from 'dot-object';
 import PouchDB from 'pouchdb-browser';
 import pouchdbFind from 'pouchdb-find';
 
+
+
+
+
+
+
+
 let assignQueue = {};
 let mergeQueue = [];
+let deltaQueue = {};
 
 PouchDB
+
   .plugin(pouchdbFind)
+
   .plugin({
     indexedDatabases: async function () {
       const connections = {};
@@ -32,7 +43,7 @@ PouchDB
     },
 
 
-  // 
+  //
   //   mergeCommit: async function(){
   //     try {
   //       console.log(mergeQueue);
@@ -52,43 +63,132 @@ PouchDB
   // this.mergeDebounced()
   //   },
 
+    //
+    // assignCommit: async function(){
+    //
+    //   for (const [id, objects] of Object.entries(assignQueue)) {
+    //     if(Object.entries(objects).length > 0){
+    //
+    //       const existing = await this.get(id);
+    //       const prepared = lo.omit(objects, ['_id', '_rev']);
+    //       const updated = lo.assign({}, existing,  prepared )
+    //       const originalObject = [...Object.entries(  dot.dot(existing)  )];
+    //       const incomingObject = [...Object.entries(  dot.dot(prepared)  )];
+    //       const newProperties = lo.difference(incomingObject.map(([k,v])=>k), originalObject.map(([k,v])=>k));
+    //       const changedProperties = incomingObject.filter(([key,value])=>originalObject.find(([k,v])=>k===key)[1]!==value)
+    //       const alteredProperties = [...newProperties, ...changedProperties];
+    //       console.log({alteredProperties});
+    //       console.log({prepared});
+    //       if(alteredProperties.length){
+    //         console.warn(`${id}: changes to `+alteredProperties.map(([k,v])=>k).join(', ') );
+    //         await this.put(updated);
+    //       }
+    //     }
+    //   }
+    //   console.log(`Emptied ${Object.entries(assignQueue).length} items.`);
+    //   assignQueue = {};
+    //
+    // },
+    //
+    // sassign: async function(id, ...objects){
+    //   if(!assignQueue[id]) assignQueue[id] = {}
+    //   assignQueue[id] = lo.assign({}, assignQueue[id], ...objects);
+    //   assignQueue[id] = lo.omit(assignQueue[id], Object.entries(assignQueue[id]).filter(([key,val])=>val===undefined).map(([key,val])=>key) );
+    //   if(!this.assignCommitDebounced) this.assignCommitDebounced = lo.debounce(this.assignCommit, 1000);
+    //   this.assignCommitDebounced()
+    // },
 
-    assignCommit: async function(){
 
-      for (const [id, objects] of Object.entries(assignQueue)) {
-        if(Object.entries(objects).length > 0){
-          const existing = await this.get(id);
-          // const updated = lo.assign({}, existing, ...objects.map(obj=>lo.omit(obj, ['_id', '_rev'])))
-          const updated = lo.assign({}, existing,  lo.omit(objects, ['_id', '_rev']) )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    deltaQueueCommit: async function(){
+
+      const enqueuedObjects = Object.keys(deltaQueue);
+      for (const enqueuedObject of enqueuedObjects) {
+
+        const collapsed = Object.assign({}, ...deltaQueue[enqueuedObject]);
+
+        // deltaQueue[enqueuedObject] = [];
+        delete deltaQueue[enqueuedObject];
+
+        const existing = await this.get(enqueuedObject);
+        const prepared = lo.omit(collapsed, ['_id', '_rev']);
+        const updated = lo.assign({}, existing,  prepared )
+
+        const existingObject = [...Object.entries(  dot.dot(existing)  )];
+        const incomingObject = [...Object.entries(  dot.dot(prepared)  )];
+
+        const newProperties = lo.difference(incomingObject.map(([k,v])=>k), existingObject.map(([k,v])=>k));
+        const changedProperties = incomingObject.filter(([key,newValue])=>{
+          const [,oldValue] = existingObject.find(([k,v])=>k===key);
+          const changed = oldValue!==newValue;
+          console.log({changed, oldValue, newValue});
+          return changed;
+        })
+
+        const alteredProperties = [...newProperties, ...changedProperties];
+
+        console.log({alteredProperties});
+        console.log({prepared});
+
+        if(alteredProperties.length){
+          console.warn(`${enqueuedObject}: changes to `+alteredProperties.map(([k,v])=>k).join(', ') );
           await this.put(updated);
         }
+
       }
 
-      console.log(`Emptied ${Object.entries(assignQueue).length} items.`);
-      assignQueue = {};
-
     },
 
-
+    // deltaQueue: async function(id, ...objects){
     assign: async function(id, ...objects){
-      // console.log(objects);
-      // console.log(assignQueue);
-      if(!assignQueue[id]) assignQueue[id] = {}
-      assignQueue[id] = lo.assign({}, assignQueue[id], ...objects);
-      assignQueue[id] = lo.omit(assignQueue[id], Object.entries(assignQueue[id]).filter(([key,val])=>val===undefined).map(([key,val])=>key) );
 
-      // console.log( JSON.stringify(assignQueue) );
-      // console.log( assignQueue );
-      if(!this.assignCommitDebounced) this.assignCommitDebounced = lo.debounce(this.assignCommit, 1000);
+      console.log('OOOOOOOO', objects);
 
-      this.assignCommitDebounced()
+      if(!this.deltaQueueDebounced) this.deltaQueueDebounced = lo.debounce(this.deltaQueueCommit, 5_000);
+      if(!deltaQueue[id]) deltaQueue[id] = [];
+
+      deltaQueue[id] = [...deltaQueue[id], ...objects];
+      this.deltaQueueDebounced()
+
     },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   });
 const connections = {};
 
 export function connect(name){
+
   if(!connections[name]) connections[name] = new PouchDB(name);
   // console.log(connections[name].changes)
   connections[name].setMaxListeners(120);
@@ -96,4 +196,5 @@ export function connect(name){
   // connections[name].changes.setMaxListeners(120);
   // connections[name].dump().then(data=>console.log(JSON.stringify(data)))
   return connections[name];
+
 };

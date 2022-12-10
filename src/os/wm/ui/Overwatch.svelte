@@ -7,8 +7,33 @@
 
   import lo from 'lodash';
   import { v4 as uuid } from 'uuid';
-  import { db, overwatch, session } from '../store.js';
+  import { db, overwatch, session, desktop } from '../store.js';
   import { slide, fade } from 'svelte/transition';
+
+
+  function tileWindows(){
+    // todo write proper code
+    
+    //NOT REAL CODE:
+    // const designDocument = 'desktops';
+    // const designView = 'windows';
+    //
+    // db.query([designDocument, designView].join('/'), { key: ['window', $desktop], include_docs: true }).then((data)=>{
+    //   const windows = lo.orderBy(data.rows.map(row=>row.doc), ['zIndex'],['desc'] );
+    //
+    //   let width = 500;
+    //   let height = 500;
+    //   let left = 150;
+    //   let top = 150;
+    //   let deltaLeft = 550;
+    //   for (const window of windows) {
+    //     db.put(Object.assign(window, {sid:0, width: `${width}px`, height: `${height}px`, left: `${left}px`, top: `${top}px`, }));
+    //     left = left + deltaLeft;
+    //   }
+    //
+    // });
+
+  }
 
 </script>
 
@@ -33,15 +58,15 @@
 
 {#if $overwatch}
   <div transition:fade class="d-flex position-absolute fixed-bottom bg-dark bg-opacity-25 m-3 p-2 rounded justify-content-center align-items-center fs-1" style="min-height: 5rem;">
-    <i class="mx-4 bi bi-wrench-adjustable"></i>
+    <i class="mx-4 bi bi-wrench-adjustable" on:click={tileWindows}></i>
     <i class="mx-4 bi bi-terminal-split"></i>
-    <i class="mx-4 bi bi-box2-heart"></i>
+    <i class="mx-4 bi bi-box2-heart" style="color: var(--bs-red);"></i>
     <i class="mx-4 bi bi-device-ssd"></i>
     <i class="mx-4 bi bi-gem"></i>
     <i class="mx-4 bi bi-journal-richtext"></i>
-    <i class="mx-4 bi bi-motherboard"></i>
+    <i class="mx-4 bi bi-motherboard" style="color: var(--bs-blue);"></i>
     <i class="mx-4 bi bi-palette"></i>
     <i class="mx-4 bi bi-shop"></i>
-    <i class="mx-4 bi bi-plugin text-info d-block-inline" on:click={()=>$overwatch=!$overwatch}></i>
+    <i class="mx-4 bi bi-plugin d-block-inline" style="color: var(--bs-indigo);" on:click={()=>$overwatch=!$overwatch}></i>
   </div>
 {/if}
