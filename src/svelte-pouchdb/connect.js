@@ -46,11 +46,11 @@ PouchDB
   //
   //   mergeCommit: async function(){
   //     try {
-  //       console.log(mergeQueue);
+  //       //console.(mergeQueue);
   //       const result = await this.bulkDocs(mergeQueue);
-  //       console.log(result);
+  //       //console.(result);
   //     } catch (err) {
-  //       console.log(err);
+  //       //console.(err);
   //     }
   //   },
   //
@@ -77,15 +77,15 @@ PouchDB
     //       const newProperties = lo.difference(incomingObject.map(([k,v])=>k), originalObject.map(([k,v])=>k));
     //       const changedProperties = incomingObject.filter(([key,value])=>originalObject.find(([k,v])=>k===key)[1]!==value)
     //       const alteredProperties = [...newProperties, ...changedProperties];
-    //       console.log({alteredProperties});
-    //       console.log({prepared});
+    //       //console.({alteredProperties});
+    //       //console.({prepared});
     //       if(alteredProperties.length){
     //         console.warn(`${id}: changes to `+alteredProperties.map(([k,v])=>k).join(', ') );
     //         await this.put(updated);
     //       }
     //     }
     //   }
-    //   console.log(`Emptied ${Object.entries(assignQueue).length} items.`);
+    //   //console.(`Emptied ${Object.entries(assignQueue).length} items.`);
     //   assignQueue = {};
     //
     // },
@@ -138,14 +138,14 @@ PouchDB
         const changedProperties = incomingObject.filter(([key,newValue])=>{
           const [,oldValue] = existingObject.find(([k,v])=>k===key);
           const changed = oldValue!==newValue;
-          console.log({changed, oldValue, newValue});
+          //console.({changed, oldValue, newValue});
           return changed;
         })
 
         const alteredProperties = [...newProperties, ...changedProperties];
 
-        console.log({alteredProperties});
-        console.log({prepared});
+        //console.({alteredProperties});
+        //console.({prepared});
 
         if(alteredProperties.length){
           console.warn(`${enqueuedObject}: changes to `+alteredProperties.map(([k,v])=>k).join(', ') );
@@ -159,7 +159,7 @@ PouchDB
     // deltaQueue: async function(id, ...objects){
     assign: async function(id, ...objects){
 
-      console.log('OOOOOOOO', objects);
+      //console.('OOOOOOOO', objects);
 
       if(!this.deltaQueueDebounced) this.deltaQueueDebounced = lo.debounce(this.deltaQueueCommit, 5_000);
       if(!deltaQueue[id]) deltaQueue[id] = [];
@@ -190,7 +190,7 @@ const connections = {};
 export function connect(name){
 
   if(!connections[name]) connections[name] = new PouchDB(name);
-  // console.log(connections[name].changes)
+  // //console.(connections[name].changes)
   connections[name].setMaxListeners(120);
   // connections[name]._changes.setMaxListeners(120);
   // connections[name].changes.setMaxListeners(120);

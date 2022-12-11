@@ -7,13 +7,13 @@
 
   import lo from 'lodash';
   import { v4 as uuid } from 'uuid';
-  import { db, overwatch, session, desktop } from '../store.js';
+  import { database, overwatch, session, desktop } from '../store.js';
   import { slide, fade } from 'svelte/transition';
 
 
   function tileWindows(){
     // todo write proper code
-    
+
     //NOT REAL CODE:
     // const designDocument = 'desktops';
     // const designView = 'windows';

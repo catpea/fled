@@ -3,7 +3,6 @@ import { v4 as uuid } from 'uuid';
 
 export function resizableWindow(node, {dot}){
 
-
   let resized = false;
   let old = [node.style.left, node.style.width, node.style.height, node.style.top];
 
@@ -11,8 +10,6 @@ export function resizableWindow(node, {dot}){
     horizontal:false,
     vertical:false
   };
-
-
   const shared = {
     previousPointerX: 0,
     previousPointerY: 0,
@@ -29,11 +26,6 @@ export function resizableWindow(node, {dot}){
     previousHeight: node.style.height?parseInt(node.style.height):'',
 
   }
-
-
-
-
-
 
   const resizing = lo.flow([
      configureMovement,
@@ -90,7 +82,7 @@ export function resizableWindow(node, {dot}){
     if(o.shared.left != o.shared.previousLeft) detail.left = `${o.shared.left}px`;
     if(o.shared.width != o.shared.previousWidth) detail.width = `${o.shared.width}px`;
     if(o.shared.height != o.shared.previousHeight) detail.height = `${o.shared.height}px`;
-    node.dispatchEvent(new CustomEvent('resizestart', { detail }));
+    node.dispatchEvent(new CustomEvent('resizeStart', { detail }));
     return o;
   }
 
@@ -107,7 +99,7 @@ export function resizableWindow(node, {dot}){
     if(o.shared.left != o.shared.previousLeft) detail.left = `${o.shared.left}px`;
     if(o.shared.width != o.shared.previousWidth) detail.width = `${o.shared.width}px`;
     if(o.shared.height != o.shared.previousHeight) detail.height = `${o.shared.height}px`;
-    node.dispatchEvent(new CustomEvent('resizeend', { detail }));
+    node.dispatchEvent(new CustomEvent('resizeEnd', { detail }));
 
 
 
@@ -354,20 +346,37 @@ export function resizableWindow(node, {dot}){
     return o;
   }
 
+  function cursorsHandler(event){
+     // if(event.target !== node) return;
+    cursors(event);
+  }
+  function activationHandler(event){
+    if(event.target !== node) return;
+    activation(event);
+  }
+  function deactivationHandler(event){
+     // if(event.target !== node) return;
+    deactivation(event);
+  }
+  function resizingHandler(event){
+    // if(event.target !== node) return;
+    resizing(event);
+  }
+
   function install(){
-    console.log(`resizable-window install`);
-    addEventListener('mousemove', cursors,  false);
-    addEventListener('mousedown', activation,  false);
-    addEventListener('mouseup',   deactivation, false);
-    addEventListener('mousemove', resizing,  false);
+    //console.(`resizable-window install`);
+    addEventListener('mousemove', cursorsHandler,  false);
+    addEventListener('mousedown', activationHandler,  false);
+    addEventListener('mouseup',   deactivationHandler, false);
+    addEventListener('mousemove', resizingHandler,  false);
   }
 
   function uninstall(){
-    console.log(`resizable-window uninstall`);
-    removeEventListener('mousemove', cursors);
-    removeEventListener('mousedown', activation);
-    removeEventListener('mouseup',   deactivation);
-    removeEventListener('mousemove', resizing);
+    //console.(`resizable-window uninstall`);
+    removeEventListener('mousemove', cursorsHandler);
+    removeEventListener('mousedown', activationHandler);
+    removeEventListener('mouseup',   deactivationHandler);
+    removeEventListener('mousemove', resizingHandler);
   }
 
   install();

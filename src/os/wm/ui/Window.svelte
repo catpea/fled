@@ -25,6 +25,8 @@
 
   import dot from 'dot-object';
 
+
+
   const components = {
     // Applications
     Manager, Dashboard,
@@ -42,27 +44,54 @@
   let doc = {};
   let node;
 
+  let debug = false;
+  const log = (...a)=>debug?console.log(...a):'';
 
+  // Boot
   bus.emit('doc.get', {_id, next:data=>doc=data})
 
-  bus.on('doc.change', incoming)
-  bus.on('doc.delta', delta)
+  // Plug Into The Bus
+  bus.on('doc.change',   incoming)
+  bus.on('doc.delta',    delta)
   bus.on('window.focus', focus)
+  bus.on('window.lock', lock);
 
-  let busy = false;
+  let internalLock = false;
+  let externalLock = false;
+
+  function lock(event){
+    if(event._id==_id){
+      const lock = event.value;
+      if(lock){
+        externalLock = true;
+        log(`externalLock set to ${externalLock} by window.focus`);
+      }else{
+        externalLock = false;
+        console.log('External Lock Release');
+
+        log(`externalLock set to ${externalLock} by window.focus`);
+        flush({});
+      }
+    }
+  }
+
   let busyLatest = {};
   let deltaQueue = [];
 
   function incoming(event){
-    console.log(event.doc);
+    log('INCOMING FUNCTION', event.doc);
      if(event.doc._id==_id){
+
       const documentA = doc;
       const documentB = event.doc;
       const diff = jsonpatch.compare(documentA, documentB);
-      console.log(`${_id} incoming diff`, diff);
-      if(busy){
+      //console.(`${_id} incoming diff`, diff);
+
+      if(internalLock||externalLock){
+        log(`${_id} incoming() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into busyLatest`);
         busyLatest = event.doc;
       }else{
+        log(`${_id} incoming() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} updating doc!!!`);
         doc = Object.assign(doc, event.doc);
       }
     }
@@ -70,14 +99,15 @@
 
   function delta(event){
      if(event._id==_id){
-       console.log(`window ${_id} got delta`, event.delta);
-      if(busy){
-        console.log('DELTA ENQUEUED', event.delta);
+      if(internalLock||externalLock){
+        log(`${_id} delta() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into deltaQueue`);
         deltaQueue.push(event.delta)
       }else{
-        console.log('BEFORE:'+ doc.zIndex);
-        doc = Object.assign(doc, event.delta);
-        console.log('AFTER:'+ doc.zIndex);
+        //console.('BEFORE:'+ doc.zIndex);
+        Object.assign(doc, event.delta);
+        log(`${_id} delta() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} merging delta!!!`);
+        doc=doc
+        // //console.(doc);
       }
     }
   }
@@ -88,24 +118,51 @@
 
   function focus(event){
      if(event._id==_id){
-       console.log('FOKUS', event);
+       log('${_id} FOCUS EVENT', event);
        doc = Object.assign(doc, event.delta);
+       bus.emit('doc.merge', {_id, delta: event.delta});
      }
   }
 
-  function update(delta){
-    busy=false;
+  // function update(delta){
+  //
+  //
+  //   internalLock = false;
+  //   log('CLEARING QUEUES: internalLock has been turned off down!');
+  //
+  //   bus.emit('doc.merge', {_id, delta});
+  //
+  //   Object.assign( doc, busyLatest);
+  //   Object.assign( doc, ...deltaQueue);
+  //   Object.assign( doc, delta);
+  //
+  //   doc=doc
+  //   busyLatest = {};
+  //   deltaQueue = [];
+  // }
+
+  function flush(delta){
+
+
+    internalLock = false;
+    log('CLEARING QUEUES: internalLock has been turned off down!');
+
     bus.emit('doc.merge', {_id, delta});
-    doc = Object.assign( doc, busyLatest, delta);
-    doc = Object.assign(doc, ...deltaQueue);
+
+    Object.assign( doc, busyLatest);
+    Object.assign( doc, ...deltaQueue);
+    Object.assign( doc, delta);
+
+    doc=doc
     busyLatest = {};
     deltaQueue = [];
   }
 
 
-  function reorder(delta){
-    for (let {_id, zIndex} of delta.detail.order) {
+  function reorder(order){
+    for (let {_id, zIndex} of order) {
       bus.emit('window.focus', {_id, delta:{zIndex}} )
+      //console.('window.focus', {_id, delta:{zIndex}} )
     }
   }
 
@@ -113,9 +170,11 @@
     bus.off('doc.change',   incoming);
     bus.off('doc.delta',    delta);
     bus.off('window.focus', focus);
+    bus.off('window.busy',  lock)
   })
 
-bus.emit('message', `${_id}: window ready`)
+  bus.emit('message', `${_id}: window ready`)
+
 
 </script>
 
@@ -125,24 +184,35 @@ bus.emit('message', `${_id}: window ready`)
   bind:this={node}
   transition:fade
 
+  use:focusableWindow
   use:draggableWindow={{dot:xdot}}
   use:resizableWindow={{dot:xdot}}
-  use:focusableWindow
 
-  on:dragStart={()=>busy=true}
-  on:resizeStart={()=>busy=true}
-  on:focusStart={()=>busy=true}
 
-  on:dragEnd={event=>update(event.detail) }
-  on:focusEnd={event=>update(event.detail) }
-  on:resizeEnd={event=>update(event.detail) }
+  on:dragStart={()=>{   internalLock = true; log(`${_id}: internalLock set to TRUE by on:dragStart`)}}
+  on:resizeStart={()=>{ internalLock = true; log(`${_id}: internalLock set to TRUE by on:resizeStart`)}}
+  on:focusStart={()=>{  internalLock = true; log(`${_id}: internalLock set to TRUE by on:focusStart`)}}
+
+  on:dragEnd={event=>{   log(`${_id}: dragEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+  on:focusEnd={event=>{  log(`${_id}: focusEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+  on:resizeEnd={event=>{ log(`${_id}: resizeEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+
   on:focusReorder={event=>reorder(event.detail)}
 
   class="window shadow position-absolute card d-block border border-secondary border-5 border-opacity-25 overflow-auto" style="z-index: {doc.zIndex}; left:{doc.left}; top:{doc.top}; width:{doc.width}; height:{doc.height};"
   >
 
+
   <div class="card-header drag-handle">
-    {_id}: I am {busy} caption <span class="text-danger fw-bold">{doc.zIndex}</span> using {doc.component}
+    {_id}: {doc.left}/{doc.top} {doc.width}:{doc.height}
+    zIndex=<span class="text-danger fw-bold">{doc.zIndex}</span>
+    {#if internalLock}<span class="badge text-bg-warning">busy</span>{/if}
+    {#if externalLock}<span class="badge text-bg-warning">locked</span>{/if}
+  </div>
+
+  <div class="card-body">
+    <div class="text-info">{JSON.stringify(busyLatest)}</div>
+    <div class="text-sucess">{JSON.stringify(deltaQueue)}</div>
   </div>
 
   {#if doc.component && components[doc.component]}

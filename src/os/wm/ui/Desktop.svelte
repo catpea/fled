@@ -1,12 +1,28 @@
 <script>
-/*
-  PLEASE REMEMBER: "Everything Is A Document".
-  do not set values directly, send them to the database first.
-  This way eveything can be edited via the file manager or command line.
-*/
+
 import { slide, fade } from 'svelte/transition';
-import { db, session, dots } from '../store.js';
+import { bus, database, session, dots } from '../store.js';
 import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
+
+function panStart(windows){
+}
+
+function panEnd(deltas){
+  for (const [_id, delta] of Object.entries(deltas)) {
+    bus.emit('doc.merge', {_id, delta});
+  }
+}
+
+function panLock(windows){
+  for (const _id of windows) {
+    bus.emit('window.lock', {_id, value:true});
+  }
+}
+function panUnlock(windows){
+  for (const _id of windows) {
+    bus.emit('window.lock', {_id, value:false});
+  }
+}
 
 </script>
 
@@ -22,8 +38,17 @@ import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
 
 </style>
 
+<div
+  transition:fade
+  use:pannableDesktop
 
-<div transition:fade use:pannableDesktop on:panend={()=>console.log('on:panend')} class="position-absolute w-100 h-100 desktop-background"></div>
+  on:panStart={({detail})=>panStart(detail)}
+  on:panEnd={({detail})=>panEnd(detail)}
+  on:panLock={({detail})=>panLock(detail)}
+  on:panUnlock={({detail})=>panUnlock(detail)}
+
+  class="position-absolute w-100 h-100 desktop-background"
+  ></div>
 <div transition:fade class="position-absolute w-100 h-100 pe-none">
 {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill}}
 <div class="text-danger">{x1},{y1},{x2},{y2}, {x},{y},{r}, {fill}</div>

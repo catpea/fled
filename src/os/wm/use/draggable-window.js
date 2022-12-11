@@ -74,7 +74,7 @@ export function draggableWindow(node, {dot}){
       left: `${this.shared.x}px`,
       top: `${this.shared.y}px`,
     };
-    this.node.dispatchEvent(new CustomEvent('dragstart', { detail }));
+    this.node.dispatchEvent(new CustomEvent('dragStart', { detail }));
   }
 
   function dispatchDrag(){
@@ -91,7 +91,7 @@ export function draggableWindow(node, {dot}){
       left: `${this.shared.x}px`,
       top: `${this.shared.y}px`,
     };
-    this.node.dispatchEvent(new CustomEvent('dragend', { detail }));
+    this.node.dispatchEvent(new CustomEvent('dragEnd', { detail }));
 
   }
 
@@ -172,7 +172,7 @@ export function draggableWindow(node, {dot}){
   const sharedHandler = (event)=>shared.inProgress?drag.bind({shared, node, event, desktop, handle })(null):0
 
   function install(){
-    console.log(`draggable-window install`);
+    //console.(`draggable-window install`);
     handle.addEventListener('mousemove', cursorsHandler, false);
     handle.addEventListener('mousedown', activationHandler, false);
     addEventListener('mouseup', deactivationHandler, false);
@@ -181,7 +181,7 @@ export function draggableWindow(node, {dot}){
   }
 
   function uninstall(){
-    console.log(`draggable-window uninstall`);
+    //console.(`draggable-window uninstall`);
     handle.removeEventListener('mousemove', cursorsHandler);
     handle.removeEventListener('mousedown', activationHandler);
     removeEventListener('mouseup', deactivationHandler);

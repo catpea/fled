@@ -4,6 +4,7 @@ import EventEmitter from 'events';
 import { writable } from 'svelte/store';
 
 import {connect} from '/src/svelte-pouchdb/connect.js';
+import {database as ouch} from '/src/db.js';
 
 export const db = connect('fled-v1');
 const changes = db.changes({ since: 'now', live: true, include_docs: true });
@@ -21,3 +22,5 @@ export const session   = writable({_id:sid, type:'session',  user:'anonymous', v
 export const overwatch = writable(true);
 export const desktop   = writable('primary'); // this produces a list of windows
 export const dots = writable({ zero:{fill:'red', x:0, y:0} });
+
+export const database = ouch;
