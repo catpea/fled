@@ -5,7 +5,7 @@
 
   import { onMount, onDestroy } from 'svelte';
   import { slide, fade } from 'svelte/transition';
-  import { db } from '../store.js';
+  import { database } from '../store.js';
 
   export let _id;
   let doc = {};
@@ -23,9 +23,10 @@
 
 
   $: if(_id){
-    db.get(_id).then(data=>{doc=data})
-    changes = db.changes({ doc_ids:[_id], since: 'now', live: true, include_docs: true });
-    changes.on('change',({doc:data})=>[data].map(data=>doc=data));
+    doc=database.get(_id);
+
+    // changes = db.changes({ doc_ids:[_id], since: 'now', live: true, include_docs: true });
+    // changes.on('change',({doc:data})=>[data].map(data=>doc=data));
   }
 
   onDestroy(()=>{

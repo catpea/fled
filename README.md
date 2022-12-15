@@ -6,6 +6,61 @@ https://allorigins.win/
 
 ## Developer Note
 
+Keep the database flat, no trees, keep it simple, relating records together is about storing referenced to record ids that need to be related.
+
+
+
+
+app.context.db = db();
+
+app.use(async ctx => {
+  console.log(ctx.db);
+});
+
+
+app.on('error', (err, ctx) => {
+  log.error('server error', err, ctx)
+});
+
+
+app.use(async ctx => {
+  ctx; // is the Context
+  ctx.request; // is a Koa Request
+  ctx.response; // is a Koa Response
+});
+
+
+ctx.state
+The recommended namespace for passing information through middleware and to your frontend views.
+ctx.state.user = await User.find(id);
+
+
+
+    checkout
+    copy
+    delete
+    get
+    head
+    lock
+    merge
+    mkactivity
+    mkcol
+    move
+    m-search
+    notify
+    options
+    patch
+    post
+    purge
+    put
+    report
+    search
+    subscribe
+    trace
+    unlock
+    unsubscribe
+
+
 ### TODO
 
 - electron

@@ -3,24 +3,26 @@
 import { slide, fade } from 'svelte/transition';
 import { bus, database, session, dots } from '../store.js';
 import {pannableDesktop} from '/src/os/wm/use/pannable-desktop.js';
+import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+
 
 function panStart(windows){
 }
 
 function panEnd(deltas){
-  for (const [_id, delta] of Object.entries(deltas)) {
-    bus.emit('doc.merge', {_id, delta});
+  for (const [id, delta] of Object.entries(deltas)) {
+    bus.emit('doc.merge', {id, delta});
   }
 }
 
 function panLock(windows){
-  for (const _id of windows) {
-    bus.emit('window.lock', {_id, value:true});
+  for (const id of windows) {
+    bus.emit('window.lock', {id, value:true});
   }
 }
 function panUnlock(windows){
-  for (const _id of windows) {
-    bus.emit('window.lock', {_id, value:false});
+  for (const id of windows) {
+    bus.emit('window.lock', {id, value:false});
   }
 }
 
@@ -46,6 +48,7 @@ function panUnlock(windows){
   on:panEnd={({detail})=>panEnd(detail)}
   on:panLock={({detail})=>panLock(detail)}
   on:panUnlock={({detail})=>panUnlock(detail)}
+  on:pan={()=>bus.emit('window.change')}
 
   class="position-absolute w-100 h-100 desktop-background"
   ></div>
@@ -55,6 +58,7 @@ function panUnlock(windows){
 {/each}
 </div>
 <slot/>
+
 <svg class="position-absolute w-100 h-100 pe-none" style="z-index: 1000000;">
   <!-- <circle cx="333" cy="777" r="50" fill="red" class=""/> -->
   {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill,stroke}}

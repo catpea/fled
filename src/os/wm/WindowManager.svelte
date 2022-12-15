@@ -4,6 +4,7 @@
   import Overwatch from '/src/os/wm/ui/Overwatch.svelte';
   import Desktop from '/src/os/wm/ui/Desktop.svelte';
   import Windows from '/src/os/wm/ui/Windows.svelte';
+  import Ports from '/src/os/wm/ui/Ports.svelte';
 
 </script>
 
@@ -12,6 +13,7 @@
     <Overwatch>
       <Desktop>
         <Windows/> <!-- contains multiple windows -->
+        <Ports/>
       </Desktop>
     </Overwatch>
   </Login>

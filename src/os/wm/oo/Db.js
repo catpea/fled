@@ -16,6 +16,15 @@ export class Database extends EventEmitter {
     this.#updateTables(data.id);
     this.emit('change.doc', {doc});
     this.emit(`change.${doc.id}`, {doc});
+    return data.id;
+  }
+  patch(id, delta){
+    if(!id) throw new Error('Patching requires an id');
+    const doc = Object.assign(this.#db.documents[id], delta);
+    //TODO: verify data has changed;
+    this.#updateTables(id);
+    this.emit('change.doc', {doc});
+    this.emit(`change.${doc.id}`, {doc});
   }
   get(id){
      return this.#db.documents[id];
@@ -37,18 +46,33 @@ export class Database extends EventEmitter {
   }
 
   #updateTables(id){
-    let documents = Object.entries(this.#db.documents);
-    if(id) documents = [[id,this.#db.documents[id]]];
+    let documents;
+
+    if(id){
+      documents = [[id,this.#db.documents[id]]];
+    }else{
+      documents = Object.entries(this.#db.documents);
+    }
+
+    // console.log('updateTables', documents);
+
     for (const [designName, mapFunctions] of Object.entries( this.#db.designs )  ) {
       for (const [viewName, mapFunction] of Object.entries( mapFunctions )  ) {
+
         for (const [id, doc] of documents) {
           const row = mapFunction(doc);
-          const failed = row.some(key=>key===undefined);
+          // console.log(designName, viewName, mapFunction, row);
+          const failed = row===undefined||row.some(key=>key===undefined);
           const existed = this.#db.tables[designName][viewName].has(id);
+          // if([designName, viewName].join('-')=='ports-window'){
+          //   console.log(failed, existed, row);
+          // }
           if(failed){ // selection criteria
             if(existed){ // remove
               this.#db.tables[designName][viewName].delete(id);
               this.emit('change.table', {id, type:'delete', design:designName, view:viewName, row});
+            }else{
+              this.emit('change.table', {id, type:'noop', design:designName, view:viewName, row});
             }
           }else{ // didn't fail
             const different = !lo.isEqual(this.#db.tables[designName][viewName].get(id), row);
@@ -56,6 +80,8 @@ export class Database extends EventEmitter {
                 if(different){ // replace the value
                   this.#db.tables[designName][viewName].set(id, row);
                   this.emit('change.table', {id, type:'patch', design:designName, view:viewName, row});
+                }else{
+                  this.emit('change.table', {id, type:'noop', design:designName, view:viewName, row});
                 }
             }else{ // add
               this.#db.tables[designName][viewName].set(id, row);
@@ -74,14 +100,39 @@ export class Database extends EventEmitter {
   }
 
   *query([designName,viewName], options){
+
     for (const [id, row] of this.#db.tables[designName][viewName].entries()) {
-      if(lo.isEqual(row, options.key)) yield this.#db.documents[id];
+      // delete \
+      // patch   ---
+      // put   /
+      if(options.key){
+        if(lo.isEqual(row, options.key)) yield this.#db.documents[id];
+      }else{
+        yield this.#db.documents[id];
+      }
+
     }
   }
 
-  listen([designName,viewName], options, execute){
-    const handler = function(event){if(lo.isEqual(event.row, options.key)) execute(event)}
-    this.on('change.table', handler)
+  listen([designName, viewName], options, execute, initialize){
+
+
+    const handler = function(event){
+      if( event.design==designName && event.view==viewName){
+        if(options.key){
+          if(lo.isEqual(event.row, options.key)) execute(event)
+        }else{
+          execute(event);
+        }
+      }
+    }
+
+    this.on('change.table', handler);
+
+    if(initialize){
+      initialize({docs:[...this.query([designName, viewName], options)]});
+    }
+
     return ()=>this.off('change.table', handler);
   }
 

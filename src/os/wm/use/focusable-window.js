@@ -39,11 +39,11 @@ export function focusableWindow(node){
 
   function recalculateOrder(){
     this.order = [... [...this.windows.filter(elementWindow=>elementWindow.id !== this.node.id), this.windows.find(o=>o.id==this.node.id)] .entries() ]
-    .map(([zIndex, window])=>({_id: window.id, zIndex, window}))
+    .map(([zIndex, window])=>({id: window.id, zIndex, window}))
   }
 
   function visuallyAdjustIndex(){
-    for (const {_id, zIndex, window} of this.order) {
+    for (const {id, zIndex, window} of this.order) {
 
            ///////////////////////////////////////////////////////////////////
           // NOTE: in a primitive setting you want to adjust zIndex here. //
@@ -55,20 +55,20 @@ export function focusableWindow(node){
     }
 
      // store in shared (between events) state
-    for (const {_id, zIndex, window} of this.order) {
-      if(this.node.id == _id) this.shared.zIndex = zIndex;
+    for (const {id, zIndex, window} of this.order) {
+      if(this.node.id == id) this.shared.zIndex = zIndex;
     }
   }
 
   function dispatchFocusStart(){
     this.shared.alpha = lo.last(this.windows).id; // alpha is the last window in this.windows
-    const detail = { _id:this.node.id, zIndex: this.shared.zIndex, order:this.order };
+    const detail = { id:this.node.id, zIndex: this.shared.zIndex, order:this.order };
     this.node.dispatchEvent(new CustomEvent('focusStart', { detail }));
     node.dispatchEvent(new CustomEvent('focusReorder', { detail:this.order }));
   }
 
   function dispatchFocusEnd(){
-    // if(lo.last(this.order)._id == this.shared.alpha) return; // if alpha has not changed, return early.
+    // if(lo.last(this.order).id == this.shared.alpha) return; // if alpha has not changed, return early.
     const detail = { zIndex: this.shared.zIndex };
     node.dispatchEvent(new CustomEvent('focusEnd', { detail }));
   }
@@ -76,6 +76,7 @@ export function focusableWindow(node){
   const startHandler = function(event){
     // if(event.target !== node) return;
     start.bind({event})(null);
+    // setTimeout(()=>end.bind({event})(null), 111)
   }
   const endHandler = function(event){
     // if(event.target !== node) return;

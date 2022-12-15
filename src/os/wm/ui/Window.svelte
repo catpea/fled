@@ -11,7 +11,7 @@
 
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { slide, fade } from 'svelte/transition';
-  import { bus, db, sid, session, overwatch, dots,  } from '../store.js';
+  import { database, bus, sid, session, overwatch, dots, desktop } from '../store.js';
 
   import {draggableWindow} from '/src/os/wm/use/draggable-window.js';
   import {resizableWindow} from '/src/os/wm/use/resizable-window.js';
@@ -22,6 +22,9 @@
 
   import DebugWindow from '/src/os/wm/dx/DebugWindow.svelte';
   import PropertyQueue from '/src/os/wm/dx/PropertyQueue.svelte';
+
+  import Port from '/src/os/wm/ui/Port.svelte';
+
 
   import dot from 'dot-object';
 
@@ -40,15 +43,23 @@
   const dispatch = createEventDispatcher();
 
 
-  export let _id;
+  export let id;
   let doc = {};
   let node;
 
   let debug = false;
   const log = (...a)=>debug?console.log(...a):'';
 
+  // TODO: Upgrade Locks
+  // const locks = {
+  //   panLock: false,
+  //   focusLock: false,
+  //   resizeLock: false,
+  //   moveLock: false,
+  // };
+
   // Boot
-  bus.emit('doc.get', {_id, next:data=>doc=data})
+  bus.emit('doc.get', {id, next:data=>doc=data})
 
   // Plug Into The Bus
   bus.on('doc.change',   incoming)
@@ -60,7 +71,7 @@
   let externalLock = false;
 
   function lock(event){
-    if(event._id==_id){
+    if(event.id==id){
       const lock = event.value;
       if(lock){
         externalLock = true;
@@ -80,32 +91,32 @@
 
   function incoming(event){
     log('INCOMING FUNCTION', event.doc);
-     if(event.doc._id==_id){
+     if(event.doc.id==id){
 
       const documentA = doc;
       const documentB = event.doc;
       const diff = jsonpatch.compare(documentA, documentB);
-      //console.(`${_id} incoming diff`, diff);
+      //console.(`${id} incoming diff`, diff);
 
       if(internalLock||externalLock){
-        log(`${_id} incoming() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into busyLatest`);
+        log(`${id} incoming() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into busyLatest`);
         busyLatest = event.doc;
       }else{
-        log(`${_id} incoming() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} updating doc!!!`);
+        log(`${id} incoming() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} updating doc!!!`);
         doc = Object.assign(doc, event.doc);
       }
     }
   }
 
   function delta(event){
-     if(event._id==_id){
+     if(event.id==id){
       if(internalLock||externalLock){
-        log(`${_id} delta() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into deltaQueue`);
+        log(`${id} delta() BUSY internalLock=${internalLock}/externalLock=${externalLock} will capture data into deltaQueue`);
         deltaQueue.push(event.delta)
       }else{
         //console.('BEFORE:'+ doc.zIndex);
         Object.assign(doc, event.delta);
-        log(`${_id} delta() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} merging delta!!!`);
+        log(`${id} delta() NOT-BUSY internalLock=${internalLock}/externalLock=${externalLock} merging delta!!!`);
         doc=doc
         // //console.(doc);
       }
@@ -117,29 +128,14 @@
   }
 
   function focus(event){
-     if(event._id==_id){
-       log('${_id} FOCUS EVENT', event);
+     if(event.id==id){
+       log('${id} FOCUS EVENT', event);
        doc = Object.assign(doc, event.delta);
-       bus.emit('doc.merge', {_id, delta: event.delta});
+       bus.emit('doc.merge', {id, delta: event.delta});
      }
   }
 
-  // function update(delta){
-  //
-  //
-  //   internalLock = false;
-  //   log('CLEARING QUEUES: internalLock has been turned off down!');
-  //
-  //   bus.emit('doc.merge', {_id, delta});
-  //
-  //   Object.assign( doc, busyLatest);
-  //   Object.assign( doc, ...deltaQueue);
-  //   Object.assign( doc, delta);
-  //
-  //   doc=doc
-  //   busyLatest = {};
-  //   deltaQueue = [];
-  // }
+
 
   function flush(delta){
 
@@ -147,7 +143,7 @@
     internalLock = false;
     log('CLEARING QUEUES: internalLock has been turned off down!');
 
-    bus.emit('doc.merge', {_id, delta});
+    bus.emit('doc.merge', {id, delta});
 
     Object.assign( doc, busyLatest);
     Object.assign( doc, ...deltaQueue);
@@ -160,9 +156,9 @@
 
 
   function reorder(order){
-    for (let {_id, zIndex} of order) {
-      bus.emit('window.focus', {_id, delta:{zIndex}} )
-      //console.('window.focus', {_id, delta:{zIndex}} )
+    for (let {id, zIndex} of order) {
+      bus.emit('window.focus', {id, delta:{zIndex}} )
+      //console.('window.focus', {id, delta:{zIndex}} )
     }
   }
 
@@ -173,14 +169,49 @@
     bus.off('window.busy',  lock)
   })
 
-  bus.emit('message', `${_id}: window ready`)
+  bus.emit('message', `${id}: window ready`)
+
+
+
+
+
+  /// Port System
+  let ports = [...database.query( ['ports', 'window'], {key: [$desktop, id /* key is the window id that the ports belong to. */ ]})]
+  // console.log(`Ports for ${id}`, ports);
+
+  const removePortListener = database.listen(['ports', 'window'], {key: [$desktop, id /* key is the window id that the ports belong to. */ ]}, (event)=>{
+    ports = [...database.query( ['ports', 'window'], {key: [$desktop, id /* key is the window id that the ports belong to. */ ]})]
+  })
+  onDestroy(()=>{
+    removePortListener();
+  })
+
+  function notifyPorts(){
+      bus.emit('window.change')
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </script>
 
 <div
 
-  id={_id}
+  {id}
   bind:this={node}
   transition:fade
 
@@ -189,13 +220,16 @@
   use:resizableWindow={{dot:xdot}}
 
 
-  on:dragStart={()=>{   internalLock = true; log(`${_id}: internalLock set to TRUE by on:dragStart`)}}
-  on:resizeStart={()=>{ internalLock = true; log(`${_id}: internalLock set to TRUE by on:resizeStart`)}}
-  on:focusStart={()=>{  internalLock = true; log(`${_id}: internalLock set to TRUE by on:focusStart`)}}
+  on:dragStart={()=>{   internalLock = true; log(`${id}: internalLock set to TRUE by on:dragStart`)}}
+  on:resizeStart={()=>{ internalLock = true; log(`${id}: internalLock set to TRUE by on:resizeStart`)}}
+  on:focusStart={()=>{  internalLock = true; log(`${id}: internalLock set to TRUE by on:focusStart`)}}
 
-  on:dragEnd={event=>{   log(`${_id}: dragEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
-  on:focusEnd={event=>{  log(`${_id}: focusEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
-  on:resizeEnd={event=>{ log(`${_id}: resizeEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+  on:dragEnd={event=>{   log(`${id}: dragEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+  on:focusEnd={event=>{  log(`${id}: focusEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+  on:resizeEnd={event=>{ log(`${id}: resizeEnd turning off internalLock`); internalLock = false; flush(event.detail); }}
+
+  on:drag={notifyPorts}
+  on:resize={notifyPorts}
 
   on:focusReorder={event=>reorder(event.detail)}
 
@@ -204,11 +238,15 @@
 
 
   <div class="card-header drag-handle">
-    {_id}: {doc.left}/{doc.top} {doc.width}:{doc.height}
+    {id}: {doc.left}/{doc.top} {doc.width}:{doc.height}
     zIndex=<span class="text-danger fw-bold">{doc.zIndex}</span>
     {#if internalLock}<span class="badge text-bg-warning">busy</span>{/if}
     {#if externalLock}<span class="badge text-bg-warning">locked</span>{/if}
   </div>
+
+  {#each ports as port, index (port.id)}
+    <Port id={port.id} />
+  {/each}
 
   <div class="card-body">
     <div class="text-info">{JSON.stringify(busyLatest)}</div>
@@ -217,12 +255,10 @@
 
   {#if doc.component && components[doc.component]}
 
-    <svelte:component {_id} this={components[doc.component]}/>
+    <svelte:component {id} this={components[doc.component]}/>
 
   {:else}
-    <!-- <h1 class="display-6 p-3" contenteditable="true" bind:textContent={doc.text} on:input={event=>db.assign(doc._id, {text: event.target.innerText})}></h1> -->
-    <!-- <h1 class="display-6 p-3" contenteditable="true" bind:textContent={doc.text} on:input={event=>db.assign(doc._id, {text: event.target.innerText})}></h1> -->
-    <!-- <DebugWindow {_id} /> -->
+    <!-- <DebugWindow {id} /> -->
     <!-- <DebugWindow value={doc}/> -->
   {/if}
 

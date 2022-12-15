@@ -49,20 +49,20 @@ let viewResultChanges;
 // })
 
 function updateWindows(){
-  windows = [...database.query( ['windows', 'desktop'], {key: ['window', $desktop]})]
+  windows = [...database.query( ['windows', 'desktop'], {key: [$desktop]})]
 }
-const cancelMonitoringWindows = database.listen(['windows', 'desktop'], {key: ['window', 'primary-desktop']}, (event)=>{
-  console.log('Windows have changed!!!', event);
-  const result = database.query( ['windows', 'desktop'], {key: ['window', 'primary-desktop']} );
-  console.log('NEW RESULT', ...result);
+
+const stop = database.listen(['windows', 'desktop'], {key: [$desktop]}, (event)=>{
+  // console.log('Yay, windows have changed in the new database.', event);
+  windows = [...database.query( ['windows', 'desktop'], {key: [$desktop]})]
 })
 onDestroy(()=>{
-  cancelMonitoringWindows();
+  stop();
 })
 
 </script>
 
 
 {#each windows as window, index (window.id)}
-  <Window _id={window.id}/>
+  <Window id={window.id}/>
 {/each}

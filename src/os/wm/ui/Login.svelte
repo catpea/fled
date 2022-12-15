@@ -1,6 +1,6 @@
 <script>
   import { slide, fade } from 'svelte/transition';
-  import { db, session } from '../store.js';
+  import { session } from '../store.js';
 
   let verifyUser = 'hunter';
   let verifyPass = 'hunter123';

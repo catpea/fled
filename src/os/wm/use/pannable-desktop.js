@@ -6,7 +6,9 @@ export function pannableDesktop(node){
     let previousPointerY = 0;
     let positions = {};
 
+    let panLockActive = false;
     async function panLock(event){
+      panLockActive = true;
       const windows = [...node.parentNode.children].filter((child) => child !== node)
       .filter(el => el.matches('div.card.window'))
       .map(el=>el.id);
@@ -14,11 +16,13 @@ export function pannableDesktop(node){
       node.dispatchEvent(new CustomEvent('panLock', { detail:windows }));
     }
     async function panUnlock(event){
+      if (!panLockActive) return;
       const windows = [...node.parentNode.children].filter((child) => child !== node)
       .filter(el => el.matches('div.card.window'))
       .map(el=>el.id);
       console.log('Dispatching panUnlock windows advisory', windows);
       node.dispatchEvent(new CustomEvent('panUnlock', { detail:windows }));
+      panLockActive = false;
     }
 
 
