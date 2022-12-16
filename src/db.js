@@ -88,7 +88,7 @@ database.put({id:'desktops-window-in', desktop:'primary', type:'window-port', wi
 database.put({                         desktop:'primary', type:'window-port', window:'desktops-window', label:'Output Port', side:'right'});
 
 {
-  let id = database.put({type:'window-port', window:'dash-087', desktop:'primary', label:'Color Transparency', control:'color-transparency' });
+  let id = database.put({type:'window-port', window:'dash-087', desktop:'primary', label:'Color Transparency', control:'color-transparency', side:'right' });
 
   setTimeout(()=>{
     database.patch(id, { label:'Color Transparency!!!' });

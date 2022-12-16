@@ -212,6 +212,7 @@
 <div
 
   {id}
+  data-id={id}
   bind:this={node}
   transition:fade
 
@@ -233,7 +234,7 @@
 
   on:focusReorder={event=>reorder(event.detail)}
 
-  class="window shadow position-absolute card d-block border border-secondary border-5 border-opacity-25 overflow-auto" style="z-index: {doc.zIndex}; left:{doc.left}; top:{doc.top}; width:{doc.width}; height:{doc.height};"
+  class="window port-drop shadow position-absolute card d-block border border-secondary border-5 border-opacity-25 overflow-auto" style="z-index: {doc.zIndex}; left:{doc.left}; top:{doc.top}; width:{doc.width}; height:{doc.height};"
   >
 
 

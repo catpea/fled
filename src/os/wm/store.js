@@ -17,6 +17,8 @@ bus.on('doc.get', function ({id, next}) { next( database.get(id) ) })
 bus.on('doc.merge', function ({id, delta}) { bus.emit('doc.delta', {id, delta}); database.patch(id, delta); })
 bus.emit('message', 'bus initialized')
 
+bus.on('window.new', function (doc){database.patch(Object.assign({"type":"window", "caption":"Untitled Window" ,"width":"320px","height":"200px","zIndex":0,"desktop":"primary" },doc))})
+
 // exported for convenience, do not create abstraction layers over PouchDB, use it directly.
 export const sid = 'guid-'+uuid();
 export const session   = writable({_id:sid, type:'session',  user:'anonymous', valid:false});

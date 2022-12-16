@@ -50,7 +50,7 @@ function panUnlock(windows){
   on:panUnlock={({detail})=>panUnlock(detail)}
   on:pan={()=>bus.emit('window.change')}
 
-  class="position-absolute w-100 h-100 desktop-background"
+  class="position-absolute w-100 h-100 desktop desktop-background port-drop"
   ></div>
 <div transition:fade class="position-absolute w-100 h-100 pe-none">
 {#each Object.values($dots) as {x1,y1,x2,y2, x,y,r, fill}}

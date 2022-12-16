@@ -67,7 +67,7 @@ onDestroy(()=>{
   {/each}
 
   <line bind:this={connectableConnector} class="d-none" stroke="#ccb668" stroke-width="2" stroke-linecap="round"/>
-  {#each ports as {x,y}}
-    <circle transition:fade use:connectablePort={{connectableConnector}} class="pe-auto" cx={x} cy={y} r={5} fill="#0de0ad" stroke="#124034" stroke-width="2"/>
+  {#each ports as {id, x,y}}
+    <circle data-id={id} transition:fade use:connectablePort={{connectableConnector, database}} class="pe-auto" cx={x} cy={y} r={5} fill="#0de0ad" stroke="#124034" stroke-width="2"/>
   {/each}
 </svg>

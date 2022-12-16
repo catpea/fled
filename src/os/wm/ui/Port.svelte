@@ -61,9 +61,9 @@
 
 </script>
 
-<div bind:this={node} class="card-body text-bg-dark mb-1 window-port mx-0">
-  <div>I am a port id: {id}</div>
+<div bind:this={node} data-id={id} class="card-body text-bg-dark mb-1 port-drop port mx-0">
+  <!-- <div>I am a port id: {id}</div> -->
   <div>label: {doc.label}</div>
-  <div>side: {doc.side}</div>
-  <div>desktop: {doc.desktop}</div>
+  <!-- <div>side: {doc.side}</div>
+  <div>desktop: {doc.desktop}</div> -->
 </div>

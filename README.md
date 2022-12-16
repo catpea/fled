@@ -2,13 +2,28 @@
 
 HTTP based code editor for functional programming
 
-https://allorigins.win/
+### This Is An Operating System; But Do Not Worry About Relying On CORS
 
-## Developer Note
+Use proxies like https://allorigins.win/ (host them yourself) to fetch data from all around the internet.
+You will never be cut-off this way.
 
-Keep the database flat, no trees, keep it simple, relating records together is about storing referenced to record ids that need to be related.
+### Communication Stack; Or, Use The Bus Luke
 
+- Bus
+- Database
 
+The Bus is high speed, when you change something in one place. You can communicate that throughout all UI components.
+
+Database sits lower than the bus, because it is slow, at least in theory.
+
+## Do Not Ask About The Parent; Keep The Database Simple By Grounding Everything Down
+
+Do not ask who is my parent. Spell it the frick out. If you do need a structure. Say that file location equals /a/b/c/d/e/f.
+But never say that b's parent is a, or that a has children of b. There is no time for lockups like this.
+
+Keep the database flat, no trees, keep it simple, relating records together is about storing references to record id/s that need to be related.
+
+### Snippets
 
 
 app.context.db = db();
