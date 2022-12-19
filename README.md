@@ -23,6 +23,10 @@ But never say that b's parent is a, or that a has children of b. There is no tim
 
 Keep the database flat, no trees, keep it simple, relating records together is about storing references to record id/s that need to be related.
 
+### shadow dom
+
+Note that WebComponents (ie CustomElements with shadowDOM) need CustomEvents with the composed:true property if you want them to bubble up past its shadowDOM boundary
+
 ### Snippets
 
 
