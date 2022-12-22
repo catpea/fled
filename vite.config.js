@@ -11,6 +11,7 @@ export default defineConfig({
       '~@fontsource': path.resolve('node_modules/@fontsource'),
       '~bootstrap': path.resolve('node_modules/bootstrap'),
       '~bootswatch': path.resolve('node_modules/bootswatch'),
+      '~xterm': path.resolve('node_modules/xterm'),
     }
   },
   // server: {

@@ -97,7 +97,6 @@ export default class Resizable {
 
   activationHandler(event){
     // if(event.target !== this.element) return;
-
     this.resized=false;
     this.old = [this.element.style.left, this.element.style.width, this.element.style.height, this.element.style.top];
     this.defineBoundingBox(event);
@@ -153,7 +152,7 @@ export default class Resizable {
       const height = parseInt(this.element.getBoundingClientRect().height);
       // const bottom = this.element.getBoundingClientRect().bottom;
 
-      // console.log({top, left, width, height, });
+      // ///console.log({top, left, width, height, });
 
       const ne = {
         cursor: 'ne',
@@ -244,7 +243,7 @@ export default class Resizable {
           if( this.within({ x: event.clientX, y: event.clientY }, zone) ){
             this.hits[name] = zone;
             cursor = `${zone.cursor}-resize`;
-            console.log(cursor);
+            ///console.log(cursor);
           }
         }
       }
@@ -277,11 +276,13 @@ export default class Resizable {
 
       if(cursor){
         // if(active && this.desktop.element.style.cursor !== 'auto') return;
-        this.desktop.element.style.cursor = cursor;
+        // this.element.style.cursor = cursor;
+        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor})
       }else{
         if(active) return;
-        console.log('CURSOR RESET');
-        this.desktop.element.style.cursor = `auto`;
+        ///console.log('CURSOR RESET');
+        // this.element.style.cursor = `auto`;
+        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor: `auto`})
       }
 
 
@@ -305,7 +306,7 @@ export default class Resizable {
 
       const selection = Object.entries(this.hits).pop();
       // this.desktop.element.style.cursor = `${selection.cursor}-resize`;
-      // console.log('Srt cursor to ', this.desktop.element.style.cursor);
+      // ///console.log('Srt cursor to ', this.desktop.element.style.cursor);
 
       const [name, {horizontal, vertical}] = selection;
       this.active.horizontal = horizontal;

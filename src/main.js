@@ -27,14 +27,14 @@ const app = new App({
 //
 // });
 
-const systemBus = new Bus();
+const bus = new Bus();
 // systemBus.on('delta', event=>console.log(event))
 const desktopElement = document.querySelector('.desktop');
-const desktop = new Desktop(desktopElement, systemBus, {});
+const desktop = new Desktop(desktopElement, bus, {});
 
 const windows = [...desktopElement.querySelectorAll('.window')];
 windows.forEach(windowElement => {
-  new Window(windowElement, systemBus, {});
+  new Window({bus, desktop, element:windowElement});
 });
 
 

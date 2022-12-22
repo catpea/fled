@@ -2,6 +2,8 @@
 
 HTTP based code editor for functional programming
 
+### Architecture
+
 ### This Is An Operating System; But Do Not Worry About Relying On CORS
 
 Use proxies like https://allorigins.win/ (host them yourself) to fetch data from all around the internet.

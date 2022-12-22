@@ -40,7 +40,9 @@
     "prettier": "^2.7.1",
     "project-name-generator": "^2.1.9",
     "svelte-fsm": "^1.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "xterm": "^5.1.0",
+    "yargs-parser": "^21.1.1"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.9",
