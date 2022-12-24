@@ -1,4 +1,7 @@
 <script>
-import WindowManager from "/src/os2/wm/WindowManager.svelte";
+
+  import WindowManager from "/src/os/ui/Manager.svelte";
+
 </script>
+
 <WindowManager/>
