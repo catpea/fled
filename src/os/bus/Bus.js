@@ -1,3 +1,2 @@
 import EventEmitter from 'events';
-
-export default EventEmitter;
+export default EventEmitter; // short bus - lol
