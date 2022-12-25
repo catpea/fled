@@ -50,3 +50,8 @@ a code editor with plenty of space
 
 - scripts, probably just shell scripts
 - node module, or just server.js and packages.json
+
+
+## Conventions
+
+- Primary desktop should always be called 'primary'.

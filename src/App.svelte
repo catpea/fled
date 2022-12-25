@@ -11,7 +11,7 @@
   import Manager from "/src/os/ui/Manager.svelte"; // This is the window manager the root of all UI concerns (Think Windows 1.0)
 
   const bus = new Bus(); // this is like booting up the OS
-
+  bus.db = db; // this is for convenience
 
 
   db.on('change.doc',(event)=>bus.emit('doc.change', event)); // forward document changes to the operating system bus
