@@ -1,11 +1,10 @@
-
 import lo from 'lodash';
-import {Database} from '/src/os/wm/oo/Db.js';
-import dd from '/src/db.json';
+import {Database} from './Db.js';
+import serialized from './db.json';
 
 ///
 
-export const database = new Database({name: 'sys'});
+export default const db = new Database({name: 'sys'});
 
 // database.put({type:'desktop', id:'primary-desktop'});
 // database.put({type:'desktop', id:'secondary-desktop'});
@@ -73,7 +72,7 @@ database.view('connectors', {
 //   cancel()
 // },1_000)
 
-for (const {doc} of dd) {
+for (const {doc} of serialized) {
   if(!doc._id.startsWith('_design')){
     doc.id = doc._id;
     database.put(lo.omit(doc, ['_id','_rev']));

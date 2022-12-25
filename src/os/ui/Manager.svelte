@@ -34,7 +34,8 @@
 
 This is just a normal web page.
 
-<Desktop>
+<!-- desktop is a container -->
+<Desktop {bus}>
 </Desktop>
 
 <!-- <div class="desktop position-fixed m-5 border border-info bg-dark shadow rounded overflow-hidden" style="width: 1024px; height:768px;">

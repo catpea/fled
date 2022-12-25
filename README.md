@@ -2,6 +2,16 @@
 
 a code editor with plenty of space
 
+## Quest For The Window / Initial Boot Sequence
+- main.js loads App
+- App.svelte loads manager
+  - configures database, loads data
+  - initializes bus and base events,
+- Manager.svelte loads desktop
+- Desktop loads Windows
+  - asks for window listing in the default desktop
+- Window asks for whatever component/app the window id calls for
+
 ## Operating System Architecture
 
 - src/os
