@@ -40,7 +40,7 @@
 
   function desktopElement(desktopElement, {bus}){
     desktopClass = new DesktopElement(desktopElement, bus);
-    cleanup.push(()=>desktop.destroy())
+    cleanup.push(()=>desktopClass.destroy())
   }
 
 
@@ -48,11 +48,7 @@
 
 <!-- this is a container of windows -->
 <div use:desktopElement={{bus}} class="desktop position-fixed m-5 border border-info bg-dark shadow rounded overflow-hidden" style="width: 1024px; height:768px;">
-
-  I am desktop, and I have {windows.length} windows!
-
   {#each windows as window, index (window.id)}
     <Window id={window.id} {index} {bus} desktop={desktopClass}/>
   {/each}
-
 </div>

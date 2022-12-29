@@ -91,7 +91,9 @@ export default class Resizable {
   }
 
   cursorsHandler(event){
-    if(event.target !== this.window.element) return;
+    // cannot return early because else of cursor logic is needed if(event.target !== this.window.element) return;
+    // this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor: `auto`});
+
     this.defineBoundingBox(event);
   }
 

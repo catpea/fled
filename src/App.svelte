@@ -18,12 +18,12 @@
 
 
   bus.on('echo', function (text) { console.log(`%cbus> ${text}`, 'color: green') })
-  bus.on('doc.get', function ({id, next}) { next( database.get(id) ) })
-  bus.on('doc.merge', function ({id, delta}) { bus.emit('doc.delta', {id, delta}); database.patch(id, delta); })
+  bus.on('doc.get', function ({id, next}) { next( db.get(id) ) })
+  bus.on('doc.merge', function ({id, delta}) { bus.emit('doc.delta', {id, delta}); db.patch(id, delta); })
 
   bus.emit('message', 'bus initialized')
 
-  bus.on('window.new', function (doc){database.patch(Object.assign({"type":"window", "caption":"Untitled Window" ,"width":"320px","height":"200px","zIndex":0,"desktop":"primary" },doc))})
+  bus.on('window.new', function (doc){db.patch(Object.assign({"type":"window", "caption":"Untitled Window" ,"width":"320px","height":"200px","zIndex":0,"desktop":"primary" },doc))})
 
   bus.emit('ready'); // system has booted an is ready to run steady
 

@@ -53,13 +53,18 @@ export default class Cursorable {
     this.cleanup.map(f=>f());
   }
 
+
   changeCursor(event){
 
     ///console.log('HEARD: ', event, [...this.locks]);
 
-    if([...this.locks].length>0) return;
+    if([...this.locks].length > 0) return;
 
-    if(event.cursor){
+    const isSpecified = !!event.cursor;
+
+
+
+    if(isSpecified){
       this.element.style.cursor = event.cursor;
     }else{
       this.desktop.element.style.cursor = `auto`;
