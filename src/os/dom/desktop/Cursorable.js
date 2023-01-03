@@ -7,14 +7,14 @@ export default class Cursorable {
   window;
   element;
   options;
-  defaults = {};
-  cleanup = [];
+  defaults = {}
+  cleanup = []
 
-  id;
+  id
 
   // Contextual
-  isLocked = false;
-  locks = new Set();
+  cursor = 'auto'
+  map = new Map()
 
   constructor({bus, desktop, element, options}){
     this.bus = bus;
@@ -44,8 +44,8 @@ export default class Cursorable {
   //////////////////////////////////////////////////////////////////////////////
 
   addEventListeners(){
+
     this.bus.on('desktop.cursor', this.changeCursor.bind(this))
-    this.bus.on('window.lock', this.locking.bind(this))
 
   }
 
@@ -56,52 +56,47 @@ export default class Cursorable {
 
   changeCursor(event){
 
+    let isDefaultState = this.cursor == 'auto';
+    let isDefaultCursor = event.cursor == 'auto';
+    let doNothing = isDefaultState && isDefaultCursor;
+    let doCursorRest = !isDefaultState && isDefaultCursor;
+    let doCursorChange = event.cursor != this.cursor;
+
+    // console.log(event);
+    if(doNothing){
+    }else if(doCursorRest){
+      this.map.delete(event.source);
+      this.cursor = 'auto';
+    }else if(doCursorChange){
+      this.map.set(event.source, event.cursor);
+    }
+    
+    // Fish out the dominant cursor
+    this.cursor = Array.from(this.map.values()).pop()||'auto';
+
+    // Synchronize this state with desktop cursor;
+    // this way we only worry about setting this.cursor
+    this.desktop.element.style.cursor = this.cursor;
+
     ///console.log('HEARD: ', event, [...this.locks]);
 
-    if([...this.locks].length > 0) return;
+    // if([...this.locks].length > 0) return;
 
-    const isSpecified = !!event.cursor;
+    // const isSpecified = !!event.cursor;
 
 
 
-    if(isSpecified){
-      this.element.style.cursor = event.cursor;
-    }else{
-      this.desktop.element.style.cursor = `auto`;
-    }
+    // if(isSpecified){
+      // this.element.style.cursor = event.cursor;
+    // }else{
+    //   this.desktop.element.style.cursor = `auto`;
+    // }
+
+
+
 
   }
 
 
-
-
-
-
-  locking(event){
-
-    const id = `${event.source}/${event.id}`
-
-    if(event.lock){
-      this.locks.add(id);
-    }else{
-      this.locks.delete(id);
-    }
-
-    //
-    // // if(event.id === this.id){
-    //   this.locks[id] = event.lock;
-    //
-    //   if(event.lock){
-    //     this.element.classList.remove('bg-dark');
-    //     this.element.classList.add('bg-danger');
-    //   }else{
-    //     this.element.classList.remove('bg-danger');
-    //     this.element.classList.add('bg-dark');
-    //   }
-    // // }
-
-
-
-  }
 
 }

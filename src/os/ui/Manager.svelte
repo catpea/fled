@@ -32,7 +32,7 @@
 
 </script>
 
-This is just a normal web page.
+
 
 <!-- desktop is a container -->
 <Desktop {bus}>

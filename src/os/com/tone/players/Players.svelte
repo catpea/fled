@@ -64,16 +64,18 @@
   }
 
   async function install(){
+
+    Tone.Transport.pause()
     names = Object.keys(urls);
     size = Object.keys(urls).length;
     players = await createPlayers();
     value = players;
     console.log('installed', players.player.size);
-
+    Tone.Transport.start()
   }
 
   function uninstall(){
-    if(players) players.dispose()
+    if(players) players.dispose();
   }
 
   //////////////////////////////////////////////////////////////////////////////

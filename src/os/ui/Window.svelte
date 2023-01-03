@@ -53,9 +53,7 @@
 
 
   <div class="object-fit-scale">
-    {#if doc?.component == 'Manager' }
-      <Beatnik/>
-    {/if}
+  hola {doc?.component}
   </div>
 
 </div>

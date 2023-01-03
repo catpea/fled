@@ -47,7 +47,7 @@
 </script>
 
 <!-- this is a container of windows -->
-<div use:desktopElement={{bus}} class="desktop position-fixed m-5 border border-info bg-dark shadow rounded overflow-hidden" style="width: 1024px; height:768px;">
+<div use:desktopElement={{bus}} class="desktop position-fixed bg-dark rounded overflow-hidden" style="top:0; left:0; width: 100%; height:100%;">
   {#each windows as window, index (window.id)}
     <Window id={window.id} {index} {bus} desktop={desktopClass}/>
   {/each}

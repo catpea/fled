@@ -64,8 +64,10 @@ export default class Draggable {
   addEventListeners(){
     if(!this.handle) return;
 
-    this.listen( this.handle, 'mousemove', event=>this.cursorsHandler(event) );
+    this.listen( window, 'mousemove', event=>this.cursorsHandler(event) );
     this.listen( this.handle, 'mousedown', event=>this.activationHandler(event) );
+    this.listen(this.handle, 'mouseleave', event=>!this.this.inProgress&&this.bus.emit('desktop.cursor', {source: `${this.constructor.name}.${this.id}`, cursor: `auto`}) );
+
 
     this.listen( window,       'mouseup',   event=>this.deactivationHandler(event) );
     this.listen( window,       'mousemove', event=>this.performDrag(event) );
@@ -130,6 +132,10 @@ export default class Draggable {
     this.dispatchDrag(event);
     this.reenableUserSelect(event);
   }
+
+
+
+
 
 
   // Handler Components
@@ -234,15 +240,15 @@ export default class Draggable {
     if(this.hits.handle) {
 
       if(this.inProgress){
-        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor:`grabbing`})
+        this.bus.emit('desktop.cursor', {source:`${this.constructor.name}:${this.id}`, cursor:`grabbing`})
         // this.handle.style.cursor = `grabbing`;
       }else{
-        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor:`grab`})
+        this.bus.emit('desktop.cursor', {source:`${this.constructor.name}:${this.id}`, cursor:`grab`})
         // this.handle.style.cursor = `grab`;
       }
 
     }else{
-      this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor:`auto`})
+      this.bus.emit('desktop.cursor', {source:`${this.constructor.name}:${this.id}`, cursor:`auto`})
       // this.handle.style.cursor = `auto`;
     }
 

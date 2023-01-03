@@ -80,6 +80,12 @@ export default class Resizable {
 
   addEventListeners(){
     this.listen(window, 'mousemove', event=>this.cursorsHandler(event) );
+    this.listen(this.element, 'mouseleave', event=>!this.isActive()&&this.bus.emit('desktop.cursor', {source: `${this.constructor.name}.${this.id}`, cursor: `auto`}) );
+
+    this.listen(this.element, 'mouseenter', event=>console.log(`Cursor entered window ${this.id}`) );
+    this.listen(this.element, 'mouseleave', event=>console.log(`Cursor left window ${this.id}`) );
+
+
     this.listen(window, 'mousedown', event=>this.activationHandler(event) );
     this.listen(window, 'mouseup',   event=>this.deactivationHandler(event) );
     this.listen(window, 'mousemove', event=>this.resizingHandler(event) );
@@ -91,7 +97,8 @@ export default class Resizable {
   }
 
   cursorsHandler(event){
-    // cannot return early because else of cursor logic is needed if(event.target !== this.window.element) return;
+
+    // if(event.target !== this.window.element) return;
     // this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor: `auto`});
 
     this.defineBoundingBox(event);
@@ -274,17 +281,19 @@ export default class Resizable {
 
 
       // const active = Object.entries(this.hits).length>1;
-      const active = this.active.horizontal || this.active.vertical;
+
+
+      if(this.isActive()) return;
 
       if(cursor){
         // if(active && this.desktop.element.style.cursor !== 'auto') return;
         // this.element.style.cursor = cursor;
-        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor})
+        this.bus.emit('desktop.cursor', {source:  `${this.constructor.name}.${this.id}`, cursor})
       }else{
-        if(active) return;
+
         ///console.log('CURSOR RESET');
         // this.element.style.cursor = `auto`;
-        this.bus.emit('desktop.cursor', {source:this.constructor.name, cursor: `auto`})
+        this.bus.emit('desktop.cursor', {source: `${this.constructor.name}.${this.id}`, cursor: `auto`})
       }
 
 
@@ -292,7 +301,9 @@ export default class Resizable {
 
 
 
-
+    isActive(){
+      return this.active.horizontal || this.active.vertical;
+    }
 
 
   activateResizing(o){
