@@ -10,31 +10,42 @@
   // TODO: setup a view to list all the desktops
 
   let desktopClass;
-  let desktop = 'primary';
+  let desktop = "";
   let windows = [];
   let cleanup = [];
+
+
+
+
+
+
+  desktop = bus.db.get('selected-desktop').selected;
   const desktopQuery = {key:[desktop]};
 
-  bus.on('desktop.change', ({id}) => {
-    desktop=id;
-    desktopQuery.key[0] = id;
-    loadWindows();
-  });
+  // bus.on('desktop.change', ({id}) => {
+  //   desktop=id;
+  //   desktopQuery.key[0] = id;
+  //   loadWindows();
+  // });
 
-  const stopWindowMonitor = bus.db.listen(['windows', 'desktop'], desktopQuery, (event)=>{
-    loadWindows();
-  })
+  // monitor for changes to which desktop is selected
+  function watchDesktop({doc}){ desktop = doc.selected; desktopQuery.key[0] = doc.selected; loadWindows(); }
+  bus.db.on('change.selected-desktop', watchDesktop);
+  cleanup.push(()=>bus.db.off('change.selected-desktop', watchDesktop))
+
+  // monitor for changes to what windows are on this desktop
+  const stopWindowMonitor = bus.db.listen(['windows', 'desktop'], desktopQuery, (event)=>{ loadWindows(); })
   cleanup.push(()=>stopWindowMonitor())
-  function loadWindows(){
-    windows = [...bus.db.query( ['windows', 'desktop'], desktopQuery)]
-  }
+  function loadWindows(){ windows = [...bus.db.query( ['windows', 'desktop'], desktopQuery)] }
+
+  // BOOT!
+  loadWindows();
 
   onDestroy(()=>{
     cleanup.map(o=>o())
   })
 
-  // BOOT!
-  loadWindows();
+
 
   // TODO: test desktop switching
 

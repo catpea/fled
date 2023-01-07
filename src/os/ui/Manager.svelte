@@ -6,6 +6,7 @@
   export let bus;
 
   import Desktop from './Desktop.svelte';
+
   //import Window from '/src/os/wm/ui/Windows.svelte';
 
   //import Login from '/src/os/wm/ui/Login.svelte';
@@ -35,8 +36,7 @@
 
 
 <!-- desktop is a container -->
-<Desktop {bus}>
-</Desktop>
+<Desktop {bus}/>
 
 <!-- <div class="desktop position-fixed m-5 border border-info bg-dark shadow rounded overflow-hidden" style="width: 1024px; height:768px;">
   {#each windows as window} -->

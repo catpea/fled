@@ -66,7 +66,7 @@ export default class Draggable {
 
     this.listen( window, 'mousemove', event=>this.cursorsHandler(event) );
     this.listen( this.handle, 'mousedown', event=>this.activationHandler(event) );
-    this.listen(this.handle, 'mouseleave', event=>!this.this.inProgress&&this.bus.emit('desktop.cursor', {source: `${this.constructor.name}.${this.id}`, cursor: `auto`}) );
+    this.listen(this.handle, 'mouseleave', event=>!this.inProgress&&this.bus.emit('desktop.cursor', {source: `${this.constructor.name}.${this.id}`, cursor: `auto`}) );
 
 
     this.listen( window,       'mouseup',   event=>this.deactivationHandler(event) );
@@ -181,16 +181,16 @@ export default class Draggable {
 
   dispatchDragStart(event){
     const detail = {
-      left: `${this.x}px`,
-      top: `${this.y}px`,
+      x: this.x,
+      y: this.y,
     };
     this.element.dispatchEvent(new CustomEvent('dragStart', { detail }));
   }
 
   dispatchDrag(event){
     const detail = {
-      left: `${this.x}px`,
-      top: `${this.y}px`,
+      x: this.x,
+      y: this.y,
     };
     this.element.dispatchEvent(new CustomEvent('drag', { detail }));
   }
@@ -198,8 +198,8 @@ export default class Draggable {
   dispatchDragEnd(event){
     if(!this.dragged) return;
     const detail = {
-      left: `${this.x}px`,
-      top: `${this.y}px`,
+      x: this.x,
+      y: this.y,
     };
     this.element.dispatchEvent(new CustomEvent('dragEnd', { detail }));
   }

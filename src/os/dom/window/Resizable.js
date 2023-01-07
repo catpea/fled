@@ -421,29 +421,31 @@ export default class Resizable {
 
   fireResize(o){
       const detail = {};
-      if(this.top != this.previousTop) detail.top = `${this.top}px`;
-      if(this.left != this.previousLeft) detail.left = `${this.left}px`;
-      if(this.width != this.previousWidth) detail.width = `${this.width}px`;
-      if(this.height != this.previousHeight) detail.height = `${this.height}px`;
+      if(this.top != this.previousTop) detail.y = this.top;
+      if(this.left != this.previousLeft) detail.x = this.left;
+      if(this.width != this.previousWidth) detail.w = this.width;
+      if(this.height != this.previousHeight) detail.h = this.height;
       this.element.dispatchEvent(new CustomEvent('resize', { detail }));
     }
 
   fireResizeStart(o){
       const detail = {};
-      if(this.top != this.previousTop) detail.top = `${this.top}px`;
-      if(this.left != this.previousLeft) detail.left = `${this.left}px`;
-      if(this.width != this.previousWidth) detail.width = `${this.width}px`;
-      if(this.height != this.previousHeight) detail.height = `${this.height}px`;
+      if(this.top != this.previousTop) detail.y = this.top;
+      if(this.left != this.previousLeft) detail.x = this.left;
+      if(this.width != this.previousWidth) detail.w = this.width;
+      if(this.height != this.previousHeight) detail.h = this.height;
       this.element.dispatchEvent(new CustomEvent('resizeStart', { detail }));
     }
 
   fireResizeEnd(o){
       if(!this.resized) return;
       const detail = {};
-      if(this.top != this.previousTop) detail.top = `${this.top}px`;
-      if(this.left != this.previousLeft) detail.left = `${this.left}px`;
-      if(this.width != this.previousWidth) detail.width = `${this.width}px`;
-      if(this.height != this.previousHeight) detail.height = `${this.height}px`;
+
+      if(this.top != this.previousTop)       detail.y = this.top;
+      if(this.left != this.previousLeft)     detail.x = this.left;
+      if(this.width != this.previousWidth)   detail.w = this.width;
+      if(this.height != this.previousHeight) detail.h = this.height;
+
       this.element.dispatchEvent(new CustomEvent('resizeEnd', { detail }));
 
       this.previousTop = this.element.style.top?parseInt(this.element.style.top):'';
@@ -457,6 +459,19 @@ export default class Resizable {
       this.height = this.element.style.height?parseInt(this.element.style.height):'';
 
     }
+
+  // fireResizeEnd(o){
+  //     if(!this.resized) return;
+  //
+  //     const detail = {
+  //       y: this.top,
+  //       x: this.left,
+  //       w: this.width,
+  //       h: this.height,
+  //     };
+  //
+  //     this.element.dispatchEvent(new CustomEvent('resizeEnd', { detail }));
+  //   }
 
 
 

@@ -58,15 +58,17 @@ export default class Focusable {
     const allWindows =
     [...this.element.parentNode.children]
     .filter(el => el.matches('.window'))
-    .map(element => ({ id:element.dataset.id, z:parseInt(element.style.zIndex), element}))
+    .map(element => ({ id:element.dataset.id, z:parseInt(element.style.zIndex)||0, element}))
     .sort((a,b)=>a.z-b.z); // numeric sort
 
     const thisWindow = allWindows.filter(({id})=>id == this.id);
     const otherWindows = allWindows.filter(({id})=>id !== this.id);
 
     this.order = otherWindows.concat(thisWindow);
+
     for (var z = 0; z < this.order.length; z++) {
       this.order[z].element.style.zIndex = z;
+      this.order[z].z = z;
     }
 
   }
@@ -74,6 +76,8 @@ export default class Focusable {
   end(event){
     for (const {id, z, element} of this.order) {
       this.bus.emit('delta', {id:this.id, source:this.constructor.name, delta:{z}});
+      element.dispatchEvent(new CustomEvent('focusEnd', { detail: {z} }));
+      console.log(id, z);
     }
   }
 

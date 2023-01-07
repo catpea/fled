@@ -5,11 +5,12 @@
 
   import WindowElement from '/src/os/dom/Window.js';
   import Beatnik from '/src/os/app/beatnik/Beatnik.svelte';
+  import Desktops from '/src/os/app/desktops/Desktops.svelte';
 
   const components = {
     // Applications
     Beatnik,
-
+    Desktops,
     // Utilities
     // Desktops, Windows,
   };
@@ -39,21 +40,31 @@
 
 </script>
 
-<div use:windowElement={{bus, desktop}} data-id="win-{id}" class="window position-absolute bg-dark border border-2 border-danger rounded overflow-auto shadow" style="left: {50*(index+1)}px; top: {50*(index+1)}px; width: {150*(index+1)}px; height:{150*(index+1)}px;">
-  <div class="window-handle text-bg-danger p-1" style="user-select: none;">My Little Program</div>
+<div
+  data-id="win-{id}"
 
+  use:windowElement={{bus, desktop}}
 
+  on:focusEnd={({detail:{z}})=>bus.db.patch(id,{z})}
+  on:panEnd={({detail:{x,y}})=>bus.db.patch(id,{x,y})}
+  on:dragEnd={({detail:{x,y}})=>bus.db.patch(id,{x,y})}
+  on:resizeEnd={({detail:{x,y,w,h}})=>bus.db.patch(id,{x,y,w,h},true)}
+
+  class="window position-absolute bg-dark border border-2 border-danger rounded overflow-auto shadow d-flex align-items-stretch flex-column"
+  style="z-index:{doc.z}; left:{doc.x}px; top:{doc.y}px; width:{doc.w}px; height:{doc.h}px;"
+>
+
+  <div class="window-handle text-bg-danger p-1" style="user-select: none;">{doc.caption}</div>
+
+  <div class="window-body flex-grow-1 overflow-y-auto">
   {#if doc.component && components[doc.component]}
-
-    <svelte:component {id} this={components[doc.component]}/>
-
+      <svelte:component {id} this={components[doc.component]} {bus}/>
   {:else}
-
+    id:{doc?.id}
+    component:{doc?.component}
   {/if}
-
-
-  <div class="object-fit-scale">
-  hola {doc?.component}
   </div>
+
+  <div class="window-status text-bg-secondary p-1" style="user-select: none;">nominal</div>
 
 </div>

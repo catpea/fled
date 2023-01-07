@@ -51,6 +51,19 @@ a code editor with plenty of space
 - scripts, probably just shell scripts
 - node module, or just server.js and packages.json
 
+## Window Layout Strategy
+- main element (window)
+  - holds the width, height, as well as top, and left (normalized to .w .h .y .x)
+  - can contain window-caption which will drag the window.
+  - is a flex layout element: d-flex
+  - contents are stretched by default: align-items-stretch
+  - contents are treated as a column: flex-column
+  - there is a window-status on the bottom
+  - window-body
+    - is set to grow: flex-grow-1
+    - is set to overflow-x-auto
+    - window body can now use h-100 w-100 due to flex arrangement
+
 
 ## Conventions
 

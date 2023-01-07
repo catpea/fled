@@ -126,14 +126,12 @@ export default class Pannable {
 
 
 
-    
 
 
 
 
 
-
-
+ 
 
 
   }
@@ -148,6 +146,9 @@ export default class Pannable {
     // issue deltas - this tells the program to save new position
     for (const {id} of windows) {
       this.bus.emit('delta', {id, source:this.constructor.name, delta:this.positions[id]});
+    }
+    for (const window of windows) {
+      window.element.dispatchEvent(new CustomEvent('panEnd', { detail: this.positions[window.id] }));
     }
   }
 

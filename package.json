@@ -5,6 +5,7 @@
   "scripts": {
     "save": "git add .; git commit -m 'New Release'; git push; npm version patch; npm publish; git push;",
     "dev": "vite",
+    "server": "./server.js",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -42,6 +43,7 @@
     "svelte-fsm": "^1.2.0",
     "tone": "^14.8.49",
     "uuid": "^9.0.0",
+    "ws": "^8.11.0",
     "xterm": "^5.1.0",
     "yargs-parser": "^21.1.1"
   },

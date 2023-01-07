@@ -3,11 +3,48 @@ import { v4 as guid } from 'uuid';
 import EventEmitter from 'events';
 
 export class Database extends EventEmitter {
+  #name = 'my-db';
   #db;
-  constructor(db){
+
+  constructor(name){
     super()
-    this.#db = Object.assign({designs:{}, documents:{}, views:{}, revisions:[], tables:{} }, db);
+    this.#name = name;
+    this.#db = Object.assign( {designs:{}, documents:{}, views:{}, revisions:[], tables:{} } );
   }
+
+  get name(){
+    return this.#name;
+  }
+
+  set name(value){
+    this.#name = value;
+  }
+
+  data(){
+    return lo.cloneDeep(this.#db.documents);
+  }
+
+    load(data){
+      this.#db.documents = data;
+      this.#updateTables();
+    }
+
+
+
+  save(){
+    const string = JSON.stringify(this.#db.documents);
+    localStorage.setItem(this.#name, string);
+    console.log('saved', this.#name, string);
+  }
+
+
+
+  restore(){
+    const string = localStorage.getItem(this.#name);
+    this.#db.documents = JSON.parse(string);
+    this.#updateTables();
+  }
+
   put(data){
     if(!data.id) data.id = 'guid-'+guid();
     if(!this.#db.documents[data.id]) this.#db.documents[data.id] = {};
@@ -18,9 +55,25 @@ export class Database extends EventEmitter {
     this.emit(`change.${doc.id}`, {doc});
     return data.id;
   }
-  patch(id, delta){
+  patch(id, delta, ignoreUndefined=false){
+    console.log('Patch', id, delta, ignoreUndefined);
     if(!id) throw new Error('Patching requires an id');
-    const doc = Object.assign(this.#db.documents[id], delta);
+
+    let patch = {};
+
+    if(ignoreUndefined){
+      for (const [key, val] of Object.entries(delta)) {
+        if(val===undefined){
+          // console.log(`skipping "${key}" becasue it is undefined`);
+        }else{
+          patch[key]=val;
+        }
+      }
+    }else{
+      patch = delta;
+    }
+
+    const doc = Object.assign(this.#db.documents[id], patch);
     //TODO: verify data has changed;
     this.#updateTables(id);
     this.emit('change.doc', {doc});
@@ -100,6 +153,8 @@ export class Database extends EventEmitter {
   }
 
   *query([designName,viewName], options){
+    if(!this.#db.tables[designName]) return;
+    if(!this.#db.tables[designName][viewName]) return;
 
     for (const [id, row] of this.#db.tables[designName][viewName].entries()) {
       // delete \
@@ -110,13 +165,10 @@ export class Database extends EventEmitter {
       }else{
         yield this.#db.documents[id];
       }
-
     }
   }
 
   listen([designName, viewName], options, execute, initialize){
-
-
     const handler = function(event){
       if( event.design==designName && event.view==viewName){
         if(options.key){
@@ -126,13 +178,10 @@ export class Database extends EventEmitter {
         }
       }
     }
-
     this.on('change.table', handler);
-
     if(initialize){
       initialize({docs:[...this.query([designName, viewName], options)]});
     }
-
     return ()=>this.off('change.table', handler);
   }
 
